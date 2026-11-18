@@ -2,6 +2,7 @@ import os
 import io
 import json
 import time
+import urllib.parse
 import datetime
 from zoneinfo import ZoneInfo
 import streamlit as st
@@ -11,121 +12,651 @@ import google.generativeai as genai
 from pypdf import PdfReader
 from docx import Document
 
-# --- Seiten-Konfiguration ---
-st.set_page_config(page_title="Recall – Active Recall & Spaced Repetition", layout="centered")
+# --- Seiten-Konfiguration: Großzügiges Wide-Layout ---
+st.set_page_config(page_title="OmniLearn", layout="wide")
 
-# --- Design & CSS: Tiefschwarz mit Ice-Blue Akzenten ---
+BERLIN_TZ = ZoneInfo("Europe/Berlin")
+DAILY_GOAL_TARGET = 30
+DAILY_GOAL_BONUS_XP = 25
+
+# --- Freischaltbare Maus-Symbole (alle 5 Level) ---
+CURSOR_MILESTONES = [
+    {
+        "level": 0,
+        "name": "Standard-Mauszeiger",
+        "short": "Standard",
+        "hot_x": 4,
+        "hot_y": 4,
+        "svg": None,
+    },
+    {
+        "level": 5,
+        "name": "Litschi",
+        "short": "Litschi",
+        "hot_x": 16,
+        "hot_y": 16,
+        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+          <ellipse cx="16" cy="17.5" rx="10.8" ry="11.5" fill="#E11D48" stroke="#07090E" stroke-width="2"/>
+          <ellipse cx="16" cy="17.5" rx="8.2" ry="9" fill="none" stroke="#FB7185" stroke-width="1.2" stroke-dasharray="2 2"/>
+          <circle cx="12.5" cy="13.5" r="1.2" fill="#FDA4AF"/><circle cx="19.5" cy="14" r="1.2" fill="#FDA4AF"/>
+          <circle cx="14" cy="21" r="1.2" fill="#FDA4AF"/><circle cx="19.5" cy="20.5" r="1.2" fill="#FDA4AF"/>
+          <path d="M16 6 C17 2.5, 22 2.5, 23 5.5 C20 6.5, 18 6.5, 16 6 Z" fill="#22C55E" stroke="#07090E" stroke-width="1.2"/>
+        </svg>""",
+    },
+    {
+        "level": 10,
+        "name": "Panzer",
+        "short": "Panzer",
+        "hot_x": 4,
+        "hot_y": 14,
+        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+          <rect x="2.5" y="12.5" width="11.5" height="3.6" rx="1.6" fill="#94A3B8" stroke="#07090E" stroke-width="1.5"/>
+          <rect x="11" y="9.5" width="12.5" height="7.2" rx="2.5" fill="#4D7C0F" stroke="#07090E" stroke-width="1.6"/>
+          <rect x="6" y="16" width="21.5" height="8.5" rx="4.2" fill="#365314" stroke="#07090E" stroke-width="1.8"/>
+          <circle cx="10.5" cy="20.2" r="1.6" fill="#A3E635"/><circle cx="16.8" cy="20.2" r="1.6" fill="#A3E635"/><circle cx="23" cy="20.2" r="1.6" fill="#A3E635"/>
+        </svg>""",
+    },
+    {
+        "level": 15,
+        "name": "Goldbarren",
+        "short": "Goldbarren",
+        "hot_x": 16,
+        "hot_y": 16,
+        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+          <polygon points="8,9.5 24,9.5 29.5,23.5 2.5,23.5" fill="#F59E0B" stroke="#07090E" stroke-width="1.8" stroke-linejoin="round"/>
+          <polygon points="10,11.5 22,11.5 25.5,20.5 6.5,20.5" fill="#FDE047"/>
+          <line x1="11" y1="13.8" x2="21" y2="13.8" stroke="#FEF9C3" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>""",
+    },
+    {
+        "level": 20,
+        "name": "Blauer Schleim",
+        "short": "Blauer Schleim",
+        "hot_x": 16,
+        "hot_y": 16,
+        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+          <path d="M16 3.5 C16 3.5, 28 14, 28 21.2 C28 26.8, 22.6 29.2, 16 29.2 C9.4 29.2, 4 26.8, 4 21.2 C4 14, 16 3.5, 16 3.5 Z" fill="#0EA5E9" stroke="#07090E" stroke-width="1.8"/>
+          <ellipse cx="11" cy="15" rx="2.2" ry="3.5" transform="rotate(-25 11 15)" fill="#BAE6FD"/>
+          <circle cx="12.5" cy="21" r="1.9" fill="#FFFFFF"/><circle cx="19.5" cy="21" r="1.9" fill="#FFFFFF"/>
+          <circle cx="12.5" cy="21" r="0.95" fill="#07090E"/><circle cx="19.5" cy="21" r="0.95" fill="#07090E"/>
+          <path d="M12.5 24.6 Q16 27 19.5 24.6" fill="none" stroke="#07090E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>""",
+    },
+    {
+        "level": 25,
+        "name": "Schneeflocke",
+        "short": "Schneeflocke",
+        "hot_x": 16,
+        "hot_y": 16,
+        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+          <g stroke="#07090E" stroke-width="3.8" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="29"/><line x1="4.7" y1="9.5" x2="27.3" y2="22.5"/><line x1="27.3" y1="9.5" x2="4.7" y2="22.5"/>
+          </g>
+          <g stroke="#7DD3FC" stroke-width="2.2" stroke-linecap="round">
+            <line x1="16" y1="3" x2="16" y2="29"/><line x1="4.7" y1="9.5" x2="27.3" y2="22.5"/><line x1="27.3" y1="9.5" x2="4.7" y2="22.5"/>
+            <polyline points="13,6 16,9 19,6" fill="none"/><polyline points="13,26 16,23 19,26" fill="none"/>
+          </g>
+          <circle cx="16" cy="16" r="2.6" fill="#E0F2FE"/>
+        </svg>""",
+    },
+    {
+        "level": 30,
+        "name": "Affenkopf",
+        "short": "Affenkopf",
+        "hot_x": 16,
+        "hot_y": 16,
+        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+          <circle cx="6.2" cy="16" r="4.2" fill="#92400E" stroke="#07090E" stroke-width="1.6"/>
+          <circle cx="25.8" cy="16" r="4.2" fill="#92400E" stroke="#07090E" stroke-width="1.6"/>
+          <circle cx="16" cy="16" r="10.5" fill="#78350F" stroke="#07090E" stroke-width="1.8"/>
+          <ellipse cx="16" cy="18.6" rx="7.2" ry="5.5" fill="#FDE68A"/>
+          <circle cx="13" cy="13.5" r="1.6" fill="#FFFFFF"/><circle cx="19" cy="13.5" r="1.6" fill="#FFFFFF"/>
+          <circle cx="13" cy="13.5" r="0.85" fill="#07090E"/><circle cx="19" cy="13.5" r="0.85" fill="#07090E"/>
+          <path d="M13 20.2 Q16 22.6 19 20.2" fill="none" stroke="#07090E" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>""",
+    },
+]
+
+def svg_zu_data_uri(svg_str: str) -> str:
+    encoded = urllib.parse.quote(svg_str.strip(), safe="")
+    return f"data:image/svg+xml,{encoded}"
+
+def ermittle_aktiven_cursor(level: int, selected_cursor_level: int) -> dict:
+    freigeschaltet = [c for c in CURSOR_MILESTONES if c["level"] <= level]
+    if selected_cursor_level == -1:
+        return freigeschaltet[-1]
+    for c in freigeschaltet:
+        if c["level"] == selected_cursor_level:
+            return c
+    return freigeschaltet[-1]
+
+# --- Level-Mathematik ---
+def xp_fuer_naechstes_level(level: int) -> int:
+    return 100 + (max(1, int(level)) - 1) * 50
+
+# --- Anki-Kartenstatus-Klassifikation ---
+def klassifiziere_karte_anki(karte: dict) -> str:
+    reps = int(karte.get("repetitions", 0))
+    iv = int(karte.get("interval_days", 0))
+    lapses = int(karte.get("lapses", 0))
+    sc = int(karte.get("success_count", 0))
+
+    if reps == 0 and lapses == 0 and sc == 0:
+        return "neu"
+    if lapses >= 2 or (lapses >= 1 and reps == 0):
+        return "kritisch"
+    if reps >= 2 and iv >= 6:
+        return "gut"
+    return "wackelig"
+
+def baue_themen_fortschritt_html(ordner_row: dict) -> str:
+    total = int(ordner_row.get("total_cards", 0))
+    due = int(ordner_row.get("due_cards", 0))
+    gut = int(ordner_row.get("gut_cards", 0))
+    wackelig = int(ordner_row.get("wackelig_cards", 0))
+    kritisch = int(ordner_row.get("kritisch_cards", 0))
+    neu = int(ordner_row.get("neu_cards", 0))
+
+    if total > 0:
+        p_gut = round((gut / total) * 100, 1)
+        p_wackelig = round((wackelig / total) * 100, 1)
+        p_kritisch = round((kritisch / total) * 100, 1)
+        p_neu = max(0.0, round(100.0 - p_gut - p_wackelig - p_kritisch, 1))
+        mastery_pct = round((gut / total) * 100)
+    else:
+        p_gut = p_wackelig = p_kritisch = 0.0
+        p_neu = 100.0
+        mastery_pct = 0
+
+    due_badge = (
+        f'<span class="topic-due-badge">{due} fällig</span>'
+        if due > 0 else '<span class="topic-done-badge">Alles erledigt</span>'
+    )
+
+    return f"""
+    <div class="topic-card">
+        <div class="topic-top-row">
+            <div class="topic-name">{ordner_row['name']}</div>
+            <div class="topic-right-meta">
+                <span class="topic-pct">{mastery_pct}% gefestigt</span>
+                {due_badge}
+            </div>
+        </div>
+        <div class="anki-bar-track">
+            <div class="anki-seg-gut" style="width:{p_gut}%;" title="Gut gelernt (≥ 6 Tage): {gut}"></div>
+            <div class="anki-seg-wackelig" style="width:{p_wackelig}%;" title="Wackelig (Lernphase): {wackelig}"></div>
+            <div class="anki-seg-kritisch" style="width:{p_kritisch}%;" title="Kritisch / Öfter falsch: {kritisch}"></div>
+            <div class="anki-seg-neu" style="width:{p_neu}%;" title="Ungelernt: {neu}"></div>
+        </div>
+        <div class="anki-legend-row">
+            <span><i class="dot-gut"></i><b>{gut}</b> gut gelernt</span>
+            <span><i class="dot-wackelig"></i><b>{wackelig}</b> wackelig</span>
+            <span><i class="dot-kritisch"></i><b>{kritisch}</b> öfter falsch</span>
+            <span><i class="dot-neu"></i><b>{neu}</b> ungelernt</span>
+        </div>
+    </div>
+    """
+
+# --- Basis-Design & Plastisches CSS ---
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #07090E;
+        background: radial-gradient(circle at 50% -10%, #0F1A2E 0%, #07090E 55%, #05070B 100%);
         color: #F1F5F9;
     }
 
+    .block-container {
+        max-width: 1180px !important;
+        padding-top: 2.2rem !important;
+        padding-bottom: 3.5rem !important;
+        padding-left: 2.4rem !important;
+        padding-right: 2.4rem !important;
+    }
+
     [data-testid="stSidebar"] {
-        background-color: #0B0F17;
-        border-right: 1px solid rgba(125, 211, 252, 0.28);
+        background-color: #090D16;
+        border-right: 1px solid rgba(125, 211, 252, 0.22);
     }
 
     hr {
         border: none !important;
-        border-top: 1px solid rgba(125, 211, 252, 0.35) !important;
-        margin: 1rem 0 !important;
+        border-top: 1px solid rgba(125, 211, 252, 0.22) !important;
+        margin: 1.35rem 0 !important;
     }
 
-    .ar-title {
-        font-size: 1.85rem;
-        font-weight: 700;
-        color: #F8FAFC;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1rem;
-        border-bottom: 1.5px solid #7DD3FC;
-        letter-spacing: 0.02em;
+    .omni-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 0.9rem;
+        margin-bottom: 1.2rem;
+        border-bottom: 1.5px solid rgba(125, 211, 252, 0.45);
+    }
+
+    .omni-brand {
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #FFFFFF 0%, #E0F2FE 55%, #7DD3FC 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1.1;
+    }
+
+    .omni-tagline {
+        font-size: 0.88rem;
+        color: #94A3B8;
+        margin-top: 0.2rem;
+        letter-spacing: 0.03em;
     }
 
     .ar-subtitle {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #E0F2FE;
-        margin-top: 0.5rem;
-        margin-bottom: 0.6rem;
-    }
-
-    /* Karteikarten-Box */
-    .flashcard-box {
-        background: linear-gradient(145deg, #0E1525 0%, #0A0F1C 100%);
-        border: 1.5px solid rgba(125, 211, 252, 0.55);
-        border-radius: 14px;
-        padding: 1.5rem 1.4rem;
-        margin: 0.8rem 0 1rem 0;
-        box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12);
-    }
-
-    .flashcard-badge {
-        display: inline-block;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: #07090E;
-        background-color: #7DD3FC;
-        padding: 0.2rem 0.6rem;
-        border-radius: 6px;
-        margin-bottom: 0.85rem;
-    }
-
-    .flashcard-badge-warn {
-        display: inline-block;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        color: #07090E;
-        background-color: #FACC15;
-        padding: 0.2rem 0.6rem;
-        border-radius: 6px;
-        margin-left: 0.4rem;
-        margin-bottom: 0.85rem;
-    }
-
-    .flashcard-question {
         font-size: 1.22rem;
         font-weight: 600;
-        color: #F8FAFC;
-        line-height: 1.55;
+        color: #E0F2FE;
+        margin-top: 0.6rem;
+        margin-bottom: 0.75rem;
     }
 
+    .section-kicker {
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #7DD3FC;
+        margin-bottom: 0.55rem;
+    }
+
+    /* Plastische 3D-Karten für Level & Tagesquest */
+    .sculpt-panel {
+        background: linear-gradient(165deg, #11192B 0%, #0A0F1A 100%);
+        border: 1px solid rgba(125, 211, 252, 0.26);
+        border-radius: 16px;
+        padding: 1.25rem 1.45rem;
+        box-shadow:
+            0 14px 30px rgba(0, 0, 0, 0.52),
+            inset 0 1px 0 rgba(255, 255, 255, 0.09);
+        height: 100%;
+    }
+
+    .panel-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.65rem;
+    }
+
+    .level-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: linear-gradient(135deg, #38BDF8 0%, #7DD3FC 100%);
+        color: #060911;
+        font-weight: 800;
+        font-size: 0.92rem;
+        padding: 0.28rem 0.8rem;
+        border-radius: 999px;
+        box-shadow: 0 4px 14px rgba(125, 211, 252, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+
+    .xp-meta {
+        font-size: 0.88rem;
+        color: #CBD5E1;
+        font-weight: 600;
+    }
+
+    .progress-track {
+        width: 100%;
+        height: 11px;
+        background: #060911;
+        border-radius: 999px;
+        border: 1px solid rgba(125, 211, 252, 0.22);
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.75);
+        overflow: hidden;
+        margin: 0.55rem 0 0.75rem 0;
+    }
+
+    .progress-fill-ice {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #0284C7 0%, #38BDF8 55%, #BAE6FD 100%);
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
+        transition: width 0.35s ease;
+    }
+
+    .progress-fill-quest {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #0EA5E9 0%, #7DD3FC 100%);
+        box-shadow: 0 0 12px rgba(125, 211, 252, 0.45);
+        transition: width 0.35s ease;
+    }
+
+    .panel-footer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: #94A3B8;
+    }
+
+    .streak-chip {
+        display: inline-block;
+        padding: 0.18rem 0.6rem;
+        border-radius: 7px;
+        background: rgba(125, 211, 252, 0.12);
+        border: 1px solid rgba(125, 211, 252, 0.3);
+        color: #E0F2FE;
+        font-weight: 600;
+    }
+
+    .streak-chip-hot {
+        display: inline-block;
+        padding: 0.18rem 0.6rem;
+        border-radius: 7px;
+        background: rgba(250, 204, 21, 0.16);
+        border: 1px solid rgba(250, 204, 21, 0.45);
+        color: #FDE047;
+        font-weight: 700;
+    }
+
+    .day-dots {
+        display: inline-flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .day-dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #070A12;
+        border: 1px solid rgba(125, 211, 252, 0.3);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .day-dot-active {
+        background: linear-gradient(135deg, #7DD3FC 0%, #38BDF8 100%);
+        border-color: #E0F2FE;
+        box-shadow: 0 0 8px rgba(125, 211, 252, 0.65);
+    }
+
+    /* Plastische 3D-Metrik-Kacheln */
     .stat-card {
-        background-color: #0E131F;
-        border: 1px solid rgba(125, 211, 252, 0.25);
-        border-radius: 10px;
-        padding: 0.8rem 1rem;
+        background: linear-gradient(165deg, #101727 0%, #090D16 100%);
+        border: 1px solid rgba(125, 211, 252, 0.24);
+        border-radius: 16px;
+        padding: 1.15rem 1rem;
         text-align: center;
+        box-shadow:
+            0 12px 26px rgba(0, 0, 0, 0.48),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(125, 211, 252, 0.5);
     }
 
     .stat-num {
-        font-size: 1.55rem;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #7DD3FC;
+        line-height: 1.15;
+        text-shadow: 0 2px 14px rgba(125, 211, 252, 0.22);
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #94A3B8;
+        margin-top: 0.25rem;
+        letter-spacing: 0.02em;
+    }
+
+    /* Themen-Fortschrittskarten (Anki-Logik) */
+    .topic-card {
+        background: linear-gradient(165deg, #101829 0%, #090D16 100%);
+        border: 1px solid rgba(125, 211, 252, 0.24);
+        border-radius: 15px;
+        padding: 1.05rem 1.25rem;
+        margin-bottom: 0.75rem;
+        box-shadow:
+            0 10px 24px rgba(0, 0, 0, 0.46),
+            inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .topic-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.55rem;
+    }
+
+    .topic-name {
+        font-size: 1.03rem;
+        font-weight: 700;
+        color: #F8FAFC;
+    }
+
+    .topic-right-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    .topic-pct {
+        font-size: 0.84rem;
         font-weight: 700;
         color: #7DD3FC;
     }
 
-    .stat-label {
+    .topic-due-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.16rem 0.55rem;
+        border-radius: 999px;
+        background: rgba(125, 211, 252, 0.14);
+        border: 1px solid rgba(125, 211, 252, 0.35);
+        color: #E0F2FE;
+    }
+
+    .topic-done-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.16rem 0.55rem;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.12);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        color: #94A3B8;
+    }
+
+    .anki-bar-track {
+        display: flex;
+        width: 100%;
+        height: 11px;
+        background: #060911;
+        border-radius: 999px;
+        border: 1px solid rgba(125, 211, 252, 0.2);
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8);
+        overflow: hidden;
+        margin-bottom: 0.6rem;
+    }
+
+    .anki-seg-gut {
+        height: 100%;
+        background: linear-gradient(90deg, #0284C7 0%, #38BDF8 65%, #7DD3FC 100%);
+        transition: width 0.35s ease;
+    }
+
+    .anki-seg-wackelig {
+        height: 100%;
+        background: linear-gradient(90deg, #EAB308 0%, #FACC15 100%);
+        transition: width 0.35s ease;
+    }
+
+    .anki-seg-kritisch {
+        height: 100%;
+        background: linear-gradient(90deg, #DC2626 0%, #F87171 100%);
+        transition: width 0.35s ease;
+    }
+
+    .anki-seg-neu {
+        height: 100%;
+        background: #172033;
+        transition: width 0.35s ease;
+    }
+
+    .anki-legend-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem;
         font-size: 0.8rem;
         color: #94A3B8;
-        margin-top: 0.15rem;
+    }
+
+    .anki-legend-row b {
+        color: #E2E8F0;
+    }
+
+    .dot-gut, .dot-wackelig, .dot-kritisch, .dot-neu {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+    .dot-gut { background: #38BDF8; box-shadow: 0 0 6px rgba(56, 189, 248, 0.6); }
+    .dot-wackelig { background: #FACC15; }
+    .dot-kritisch { background: #F87171; }
+    .dot-neu { background: #334155; border: 1px solid #64748B; }
+
+    /* Plastische Karteikarten-Box */
+    .flashcard-box {
+        background: linear-gradient(160deg, #11192C 0%, #0A0F1B 100%);
+        border: 1.5px solid rgba(125, 211, 252, 0.48);
+        border-radius: 18px;
+        padding: 2rem 1.85rem;
+        margin: 1rem 0 1.25rem 0;
+        box-shadow:
+            0 18px 38px rgba(0, 0, 0, 0.58),
+            0 0 0 1px rgba(125, 211, 252, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .flashcard-badge {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #060911;
+        background: linear-gradient(135deg, #7DD3FC 0%, #38BDF8 100%);
+        padding: 0.26rem 0.72rem;
+        border-radius: 7px;
+        margin-bottom: 1rem;
+        box-shadow: 0 3px 10px rgba(56, 189, 248, 0.25);
+    }
+
+    .flashcard-badge-xp {
+        display: inline-block;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: #BAE6FD;
+        background: rgba(125, 211, 252, 0.12);
+        border: 1px solid rgba(125, 211, 252, 0.35);
+        padding: 0.23rem 0.65rem;
+        border-radius: 7px;
+        margin-left: 0.45rem;
+        margin-bottom: 1rem;
+    }
+
+    .flashcard-badge-warn {
+        display: inline-block;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: #07090E;
+        background-color: #FACC15;
+        padding: 0.25rem 0.68rem;
+        border-radius: 7px;
+        margin-left: 0.45rem;
+        margin-bottom: 1rem;
+    }
+
+    .flashcard-question {
+        font-size: 1.32rem;
+        font-weight: 600;
+        color: #F8FAFC;
+        line-height: 1.6;
+    }
+
+    .xp-banner {
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.16) 0%, rgba(15, 23, 42, 0.92) 100%);
+        border: 1px solid rgba(125, 211, 252, 0.5);
+        border-radius: 12px;
+        padding: 0.75rem 1.1rem;
+        margin-bottom: 1rem;
+        color: #E0F2FE;
+        font-size: 0.94rem;
+        font-weight: 600;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.6rem;
+        background: #0A0F1A;
+        padding: 0.4rem;
+        border-radius: 14px;
+        border: 1px solid rgba(125, 211, 252, 0.2);
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55);
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 10px !important;
+        padding: 0.65rem 1.2rem !important;
+        font-weight: 600 !important;
+        font-size: 0.96rem !important;
+        color: #94A3B8 !important;
+        border: none !important;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(160deg, #162238 0%, #0F172A 100%) !important;
+        color: #E0F2FE !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(125, 211, 252, 0.35) !important;
     }
 
     .stButton > button {
-        border: 1px solid rgba(125, 211, 252, 0.45) !important;
-        background-color: #0E1525 !important;
+        background: linear-gradient(180deg, #152036 0%, #0D1424 100%) !important;
+        border: 1px solid rgba(125, 211, 252, 0.42) !important;
         color: #E0F2FE !important;
-        border-radius: 8px !important;
-        font-weight: 500 !important;
+        border-radius: 12px !important;
+        padding: 0.62rem 1.1rem !important;
+        font-weight: 600 !important;
+        box-shadow:
+            0 6px 16px rgba(0, 0, 0, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        transition: all 0.15s ease !important;
     }
     .stButton > button:hover {
         border-color: #7DD3FC !important;
-        background-color: #152238 !important;
+        background: linear-gradient(180deg, #1B2A47 0%, #111B30 100%) !important;
         color: #FFFFFF !important;
+        transform: translateY(-1px) !important;
+        box-shadow:
+            0 8px 20px rgba(2, 132, 199, 0.22),
+            inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+    }
+    .stButton > button:active {
+        transform: translateY(1px) !important;
     }
     </style>
     """,
@@ -143,14 +674,26 @@ def passwort_pruefen():
         st.session_state.eingeloggt = False
 
     if not st.session_state.eingeloggt:
-        st.markdown('<div class="ar-title">Zugang geschützt</div>', unsafe_allow_html=True)
-        eingabe = st.text_input("Bitte Passwort eingeben:", type="password")
-        if st.button("Entsperren", use_container_width=True):
-            if eingabe == richtiges_passwort:
-                st.session_state.eingeloggt = True
-                st.rerun()
-            else:
-                st.error("Falsches Passwort.")
+        st.markdown(
+            """
+            <div class="omni-header">
+                <div>
+                    <div class="omni-brand">OmniLearn</div>
+                    <div class="omni-tagline">Active Recall & Spaced Repetition</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        col_l, _ = st.columns([1.2, 1])
+        with col_l:
+            eingabe = st.text_input("Zugangspasswort:", type="password", placeholder="Passwort eingeben...")
+            if st.button("Entsperren", use_container_width=True):
+                if eingabe == richtiges_passwort:
+                    st.session_state.eingeloggt = True
+                    st.rerun()
+                else:
+                    st.error("Falsches Passwort.")
         st.stop()
 
 passwort_pruefen()
@@ -213,9 +756,34 @@ def init_db():
                     interval_days INTEGER NOT NULL DEFAULT 0,
                     repetitions INTEGER NOT NULL DEFAULT 0,
                     lapses INTEGER NOT NULL DEFAULT 0,
+                    success_count INTEGER NOT NULL DEFAULT 0,
                     next_review TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                     created_at TIMESTAMPTZ DEFAULT NOW()
                 );
+            """)
+            cur.execute("ALTER TABLE cards ADD COLUMN IF NOT EXISTS success_count INTEGER NOT NULL DEFAULT 0;")
+            cur.execute("UPDATE cards SET success_count = repetitions WHERE success_count = 0 AND repetitions > 0;")
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS user_progress (
+                    id INTEGER PRIMARY KEY DEFAULT 1,
+                    level INTEGER NOT NULL DEFAULT 1,
+                    xp_in_level INTEGER NOT NULL DEFAULT 0,
+                    total_xp INTEGER NOT NULL DEFAULT 0,
+                    answer_streak INTEGER NOT NULL DEFAULT 0,
+                    best_answer_streak INTEGER NOT NULL DEFAULT 0,
+                    daily_cards_done INTEGER NOT NULL DEFAULT 0,
+                    daily_quest_claimed BOOLEAN NOT NULL DEFAULT FALSE,
+                    stats_date DATE NOT NULL DEFAULT CURRENT_DATE,
+                    daily_quest_streak INTEGER NOT NULL DEFAULT 0,
+                    last_quest_completed_date DATE,
+                    selected_cursor_level INTEGER NOT NULL DEFAULT -1
+                );
+            """)
+            cur.execute("""
+                INSERT INTO user_progress (id, level, xp_in_level, total_xp, stats_date)
+                VALUES (1, 1, 0, 0, CURRENT_DATE)
+                ON CONFLICT (id) DO NOTHING;
             """)
         conn.commit()
     finally:
@@ -229,7 +797,214 @@ except Exception as e:
     st.info("Prüfe in Streamlit unter **Settings → Secrets**, ob `DATABASE_URL` korrekt eingetragen ist.")
     st.stop()
 
-# --- Gemini API Initialisierung (automatische Modellwahl gegen 404/429) ---
+# --- Fortschritt, XP, Quests & Cursor-Datenbankfunktionen ---
+def lade_user_progress():
+    heute_berlin = datetime.datetime.now(BERLIN_TZ).date()
+    gestern_berlin = heute_berlin - datetime.timedelta(days=1)
+
+    conn = get_connection()
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("SELECT * FROM user_progress WHERE id = 1;")
+            row = cur.fetchone()
+            if not row:
+                cur.execute(
+                    "INSERT INTO user_progress (id, level, xp_in_level, total_xp, stats_date) VALUES (1, 1, 0, 0, %s) RETURNING *;",
+                    (heute_berlin,)
+                )
+                row = cur.fetchone()
+
+            needs_update = False
+            stats_date = row["stats_date"]
+            daily_cards_done = row["daily_cards_done"]
+            daily_quest_claimed = row["daily_quest_claimed"]
+            daily_quest_streak = row["daily_quest_streak"]
+            last_completed = row["last_quest_completed_date"]
+
+            if stats_date != heute_berlin:
+                daily_cards_done = 0
+                daily_quest_claimed = False
+                stats_date = heute_berlin
+                needs_update = True
+
+            if daily_quest_streak > 0 and (last_completed is None or last_completed < gestern_berlin):
+                daily_quest_streak = 0
+                needs_update = True
+
+            if needs_update:
+                cur.execute(
+                    """
+                    UPDATE user_progress
+                    SET daily_cards_done = %s,
+                        daily_quest_claimed = %s,
+                        stats_date = %s,
+                        daily_quest_streak = %s
+                    WHERE id = 1
+                    RETURNING *;
+                    """,
+                    (daily_cards_done, daily_quest_claimed, stats_date, daily_quest_streak)
+                )
+                row = cur.fetchone()
+        conn.commit()
+        return dict(row)
+    finally:
+        conn.close()
+
+def verarbeite_antwort_xp(erfolgreich: bool, war_erste_loesung: bool) -> dict:
+    heute_berlin = datetime.datetime.now(BERLIN_TZ).date()
+    gestern_berlin = heute_berlin - datetime.timedelta(days=1)
+
+    prog = lade_user_progress()
+
+    level = int(prog["level"])
+    xp_in_level = int(prog["xp_in_level"])
+    total_xp = int(prog["total_xp"])
+    answer_streak = int(prog["answer_streak"])
+    best_answer_streak = int(prog["best_answer_streak"])
+    daily_cards_done = int(prog["daily_cards_done"])
+    daily_quest_claimed = bool(prog["daily_quest_claimed"])
+    daily_quest_streak = int(prog["daily_quest_streak"])
+    last_completed = prog["last_quest_completed_date"]
+    selected_cursor_level = int(prog["selected_cursor_level"])
+
+    ereignisse = []
+    xp_gewinn = 0
+
+    if not erfolgreich:
+        answer_streak = 0
+        ereignisse.append("Antwort-Streak zurückgesetzt · Karte kommt gleich nochmal.")
+    else:
+        basis_xp = 2 if war_erste_loesung else 1
+        answer_streak += 1
+        best_answer_streak = max(best_answer_streak, answer_streak)
+
+        if answer_streak >= 20:
+            streak_bonus = 2
+        elif answer_streak >= 10:
+            streak_bonus = 1
+        else:
+            streak_bonus = 0
+
+        karten_xp = basis_xp + streak_bonus
+        xp_gewinn += karten_xp
+
+        details = [f"+{basis_xp} XP ({'Erst-Erfolg' if war_erste_loesung else 'Wiederholung'})"]
+        if streak_bonus > 0:
+            details.append(f"+{streak_bonus} XP ({answer_streak}er-Streak)")
+        ereignisse.append(" · ".join(details))
+
+        daily_cards_done += 1
+        extra_level_ups = 0
+
+        if daily_cards_done >= DAILY_GOAL_TARGET and not daily_quest_claimed:
+            daily_quest_claimed = True
+            xp_gewinn += DAILY_GOAL_BONUS_XP
+            ereignisse.append(f"🎯 Tagesziel ({DAILY_GOAL_TARGET}/{DAILY_GOAL_TARGET}) erfüllt: +{DAILY_GOAL_BONUS_XP} XP Extra!")
+
+            if last_completed == gestern_berlin:
+                daily_quest_streak += 1
+            elif last_completed == heute_berlin:
+                pass
+            else:
+                daily_quest_streak = 1
+            last_completed = heute_berlin
+
+            if daily_quest_streak > 0 and daily_quest_streak % 7 == 0:
+                extra_level_ups += 1
+                ereignisse.append(f"🔥 {daily_quest_streak} Tage in Folge! Vollständiges Level-Up!")
+
+        old_level = level
+        xp_in_level += xp_gewinn
+        total_xp += xp_gewinn
+
+        while xp_in_level >= xp_fuer_naechstes_level(level):
+            xp_in_level -= xp_fuer_naechstes_level(level)
+            level += 1
+
+        level += extra_level_ups
+
+        if level > old_level:
+            ereignisse.append(f"⬆️ Level-Up erreicht: Jetzt Level {level}!")
+            neu_freigeschaltet = [
+                c for c in CURSOR_MILESTONES
+                if c["level"] > 0 and old_level < c["level"] <= level
+            ]
+            if neu_freigeschaltet:
+                neues_symbol = neu_freigeschaltet[-1]
+                selected_cursor_level = -1
+                ereignisse.append(f"✨ Neues Maus-Symbol freigeschaltet: {neues_symbol['name']}!")
+
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE user_progress
+                SET level = %s,
+                    xp_in_level = %s,
+                    total_xp = %s,
+                    answer_streak = %s,
+                    best_answer_streak = %s,
+                    daily_cards_done = %s,
+                    daily_quest_claimed = %s,
+                    stats_date = %s,
+                    daily_quest_streak = %s,
+                    last_quest_completed_date = %s,
+                    selected_cursor_level = %s
+                WHERE id = 1;
+                """,
+                (
+                    level,
+                    xp_in_level,
+                    total_xp,
+                    answer_streak,
+                    best_answer_streak,
+                    daily_cards_done,
+                    daily_quest_claimed,
+                    heute_berlin,
+                    daily_quest_streak,
+                    last_completed,
+                    selected_cursor_level,
+                ),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+    return {
+        "xp_gewinn": xp_gewinn,
+        "text": "  |  ".join(ereignisse),
+    }
+
+def setze_ausgewaehlten_cursor(cursor_level: int):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE user_progress SET selected_cursor_level = %s WHERE id = 1;", (cursor_level,))
+        conn.commit()
+    finally:
+        conn.close()
+
+# --- Benutzer-Fortschritt laden & freigeschaltetes Maus-Symbol anwenden ---
+user_prog = lade_user_progress()
+aktuelles_level = int(user_prog["level"])
+aktiver_cursor = ermittle_aktiven_cursor(aktuelles_level, int(user_prog["selected_cursor_level"]))
+
+if aktiver_cursor["svg"]:
+    cursor_uri = svg_zu_data_uri(aktiver_cursor["svg"])
+    hx, hy = aktiver_cursor["hot_x"], aktiver_cursor["hot_y"]
+    st.markdown(
+        f"""
+        <style>
+        html, body, .stApp, .stApp * {{
+            cursor: url("{cursor_uri}") {hx} {hy}, auto !important;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# --- Gemini API Initialisierung ---
 @st.cache_resource
 def init_gemini():
     try:
@@ -370,14 +1145,12 @@ def berechne_sm2(ease_factor, interval_days, repetitions, lapses, bewertung):
     lapses = int(lapses)
 
     if bewertung == 1:
-        # Falsch beantwortet -> Zurücksetzen & in derselben Sitzung erneut abfragen
         reps = 0
         interval = 0
         lapses += 1
         ef = max(1.3, ef - 0.20)
         next_delta = datetime.timedelta(minutes=1)
     elif bewertung == 2:
-        # Schwer
         if reps == 0:
             interval = 1
         elif reps == 1:
@@ -388,7 +1161,6 @@ def berechne_sm2(ease_factor, interval_days, repetitions, lapses, bewertung):
         ef = max(1.3, ef - 0.15)
         next_delta = datetime.timedelta(days=interval)
     elif bewertung == 3:
-        # Gut (klassisches SM-2)
         if reps == 0:
             interval = 1
         elif reps == 1:
@@ -398,7 +1170,6 @@ def berechne_sm2(ease_factor, interval_days, repetitions, lapses, bewertung):
         reps += 1
         next_delta = datetime.timedelta(days=interval)
     else:
-        # Leicht
         if reps == 0:
             interval = 4
         elif reps == 1:
@@ -421,7 +1192,7 @@ def formatiere_intervall_vorschau(ease_factor, interval_days, repetitions, lapse
     else:
         return f"{iv} Tage"
 
-# --- Datenbank-Hilfsfunktionen ---
+# --- Datenbank-Hilfsfunktionen inkl. Anki-Themen-Statistiken ---
 def lade_ordner():
     conn = get_connection()
     try:
@@ -433,7 +1204,33 @@ def lade_ordner():
                     COUNT(DISTINCT d.id) AS doc_count,
                     COUNT(DISTINCT c.id) AS total_cards,
                     COUNT(DISTINCT CASE WHEN c.next_review <= NOW() THEN c.id END) AS due_cards,
-                    COUNT(DISTINCT CASE WHEN c.lapses > 0 THEN c.id END) AS weak_cards
+                    COUNT(DISTINCT CASE WHEN c.lapses > 0 THEN c.id END) AS weak_cards,
+                    COUNT(DISTINCT CASE
+                        WHEN c.id IS NOT NULL
+                         AND c.repetitions = 0
+                         AND c.lapses = 0
+                         AND COALESCE(c.success_count, 0) = 0
+                        THEN c.id
+                    END) AS neu_cards,
+                    COUNT(DISTINCT CASE
+                        WHEN c.id IS NOT NULL
+                         AND (c.lapses >= 2 OR (c.lapses >= 1 AND c.repetitions = 0))
+                        THEN c.id
+                    END) AS kritisch_cards,
+                    COUNT(DISTINCT CASE
+                        WHEN c.id IS NOT NULL
+                         AND NOT (c.lapses >= 2 OR (c.lapses >= 1 AND c.repetitions = 0))
+                         AND c.repetitions >= 2
+                         AND c.interval_days >= 6
+                        THEN c.id
+                    END) AS gut_cards,
+                    COUNT(DISTINCT CASE
+                        WHEN c.id IS NOT NULL
+                         AND NOT (c.repetitions = 0 AND c.lapses = 0 AND COALESCE(c.success_count, 0) = 0)
+                         AND NOT (c.lapses >= 2 OR (c.lapses >= 1 AND c.repetitions = 0))
+                         AND NOT (c.repetitions >= 2 AND c.interval_days >= 6)
+                        THEN c.id
+                    END) AS wackelig_cards
                 FROM folders f
                 LEFT JOIN documents d ON d.folder_id = f.id
                 LEFT JOIN cards c ON c.folder_id = f.id
@@ -542,7 +1339,7 @@ def lade_lernkarten(folder_id=None, modus="due"):
     finally:
         conn.close()
 
-def aktualisiere_karte_sm2(card_id, ef, interval, reps, lapses, next_review):
+def aktualisiere_karte_sm2(card_id, ef, interval, reps, lapses, next_review, neu_success_count):
     conn = get_connection()
     try:
         with conn.cursor() as cur:
@@ -553,10 +1350,11 @@ def aktualisiere_karte_sm2(card_id, ef, interval, reps, lapses, next_review):
                     interval_days = %s,
                     repetitions = %s,
                     lapses = %s,
-                    next_review = %s
+                    next_review = %s,
+                    success_count = %s
                 WHERE id = %s;
                 """,
-                (ef, interval, reps, lapses, next_review, card_id)
+                (ef, interval, reps, lapses, next_review, neu_success_count, card_id)
             )
         conn.commit()
     finally:
@@ -571,7 +1369,7 @@ def loesche_karte(card_id):
     finally:
         conn.close()
 
-# --- Session State für aktive Lernsitzung ---
+# --- Session State ---
 if "study_queue" not in st.session_state:
     st.session_state.study_queue = []
 if "study_show_answer" not in st.session_state:
@@ -582,26 +1380,158 @@ if "study_initial_total" not in st.session_state:
     st.session_state.study_initial_total = 0
 if "study_label" not in st.session_state:
     st.session_state.study_label = ""
+if "last_xp_event" not in st.session_state:
+    st.session_state.last_xp_event = None
 
-# --- Hauptüberschrift & Status-Übersicht ---
-st.markdown('<div class="ar-title">Active Recall & Spaced Repetition</div>', unsafe_allow_html=True)
+# ==============================================================================
+# KOPFBEREICH & LEVEL-/QUEST-ÜBERSICHT (PLASTISCH & MINIMALISTISCH)
+# ==============================================================================
+col_brand, col_cursor_btn = st.columns([4.5, 1.5])
+with col_brand:
+    st.markdown(
+        """
+        <div class="omni-header" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+            <div>
+                <div class="omni-brand">OmniLearn</div>
+                <div class="omni-tagline">Active Recall & Spaced Repetition</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
+with col_cursor_btn:
+    st.markdown("<div style='height:0.35rem;'></div>", unsafe_allow_html=True)
+    with st.popover(f"🖱️ Maus: {aktiver_cursor['short']}", use_container_width=True):
+        st.markdown("**Freigeschaltete Maus-Symbole**")
+        st.caption("Alle 5 Level schaltest du ein neues Symbol für deinen Mauszeiger frei.")
+        for item in CURSOR_MILESTONES:
+            freigeschaltet = aktuelles_level >= item["level"]
+            if item["svg"]:
+                uri = svg_zu_data_uri(item["svg"])
+                icon_html = f'<img src="{uri}" width="20" height="20" style="vertical-align:middle;margin-right:6px;"/>'
+            else:
+                icon_html = "↖️ "
+
+            status = "Freigeschaltet" if freigeschaltet else f"Ab Level {item['level']}"
+            label_row = f"{icon_html}<b>{item['name']}</b> — <span style='color:#94A3B8;font-size:0.82rem;'>{status}</span>"
+            st.markdown(label_row, unsafe_allow_html=True)
+
+            if freigeschaltet:
+                ist_aktiv = (aktiver_cursor["level"] == item["level"])
+                btn_txt = "✓ Aktiv" if ist_aktiv else "Auswählen"
+                if st.button(btn_txt, key=f"cur_sel_{item['level']}", disabled=ist_aktiv, use_container_width=True):
+                    setze_ausgewaehlten_cursor(item["level"])
+                    st.rerun()
+
+st.markdown("<hr style='margin-top:0.6rem;margin-bottom:1.1rem;'>", unsafe_allow_html=True)
+
+# --- Level- & Tagesquest-Karten ---
+xp_im_lvl = int(user_prog["xp_in_level"])
+xp_ziel_lvl = xp_fuer_naechstes_level(aktuelles_level)
+lvl_prozent = min(100, round((xp_im_lvl / max(1, xp_ziel_lvl)) * 100))
+
+answer_streak = int(user_prog["answer_streak"])
+if answer_streak >= 20:
+    streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Streak (+2 XP / Karte)</span>'
+elif answer_streak >= 10:
+    streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Streak (+1 XP / Karte)</span>'
+else:
+    streak_html = f'<span class="streak-chip">Serie: {answer_streak} richtig in Folge</span>'
+
+naechster_cursor = next((c for c in CURSOR_MILESTONES if c["level"] > aktuelles_level), None)
+cursor_vorschau_txt = (
+    f"Nächstes Maus-Symbol ab Lv. {naechster_cursor['level']}: {naechster_cursor['name']}"
+    if naechster_cursor else "Alle Maus-Symbole freigeschaltet"
+)
+
+daily_done = int(user_prog["daily_cards_done"])
+daily_pct = min(100, round((daily_done / DAILY_GOAL_TARGET) * 100))
+daily_claimed = bool(user_prog["daily_quest_claimed"])
+quest_streak = int(user_prog["daily_quest_streak"])
+tage_im_zyklus = quest_streak % 7 if (quest_streak % 7 != 0 or quest_streak == 0) else 7
+
+dots_html = "".join(
+    f'<span class="day-dot {"day-dot-active" if i < tage_im_zyklus else ""}"></span>'
+    for i in range(7)
+)
+quest_status_txt = (
+    f"Tagesziel erfüllt (+{DAILY_GOAL_BONUS_XP} XP erhalten)"
+    if daily_claimed else f"Noch {max(0, DAILY_GOAL_TARGET - daily_done)} Karten bis +{DAILY_GOAL_BONUS_XP} XP"
+)
+
+col_lvl, col_quest = st.columns(2)
+with col_lvl:
+    st.markdown(
+        f"""
+        <div class="sculpt-panel">
+            <div class="panel-top-row">
+                <span class="level-pill">Level {aktuelles_level}</span>
+                <span class="xp-meta">{xp_im_lvl} / {xp_ziel_lvl} XP</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill-ice" style="width:{lvl_prozent}%;"></div>
+            </div>
+            <div class="panel-footer-row">
+                {streak_html}
+                <span>{cursor_vorschau_txt}</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with col_quest:
+    st.markdown(
+        f"""
+        <div class="sculpt-panel">
+            <div class="panel-top-row">
+                <span style="font-weight:700;color:#F8FAFC;font-size:0.98rem;">Tagesziel: {min(daily_done, DAILY_GOAL_TARGET)} / {DAILY_GOAL_TARGET} Karten</span>
+                <span class="xp-meta">{quest_status_txt}</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill-quest" style="width:{daily_pct}%;"></div>
+            </div>
+            <div class="panel-footer-row">
+                <span>7-Tage-Quest (Volles Level-Up): <b>{quest_streak}</b> Tage</span>
+                <span class="day-dots">{dots_html}</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+st.markdown("<div style='height:0.95rem;'></div>", unsafe_allow_html=True)
+
+# --- Status-Kacheln ---
 ordner_liste = lade_ordner()
 gesamt_karten = sum(o["total_cards"] for o in ordner_liste)
 gesamt_faellig = sum(o["due_cards"] for o in ordner_liste)
-gesamt_schwach = sum(o["weak_cards"] for o in ordner_liste)
+gesamt_schwach = sum(o["kritisch_cards"] for o in ordner_liste)
 
 c1, c2, c3, c4 = st.columns(4)
 with c1:
     st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_faellig}</div><div class="stat-label">Heute fällig</div></div>', unsafe_allow_html=True)
 with c2:
-    st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_schwach}</div><div class="stat-label">Fehler-Stapel</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_schwach}</div><div class="stat-label">Kritisch / Öfter falsch</div></div>', unsafe_allow_html=True)
 with c3:
     st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_karten}</div><div class="stat-label">Karten gesamt</div></div>', unsafe_allow_html=True)
 with c4:
-    st.markdown(f'<div class="stat-card"><div class="stat-num">{len(ordner_liste)}</div><div class="stat-label">Ordner</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="stat-card"><div class="stat-num">{len(ordner_liste)}</div><div class="stat-label">Themen-Ordner</div></div>', unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
+# --- Themen-Fortschritt (Anki-Status pro Thema) ---
+if ordner_liste:
+    st.markdown("<div style='height:1.1rem;'></div>", unsafe_allow_html=True)
+    st.markdown('<div class="section-kicker">Themen-Fortschritt (Anki-Status)</div>', unsafe_allow_html=True)
+    for idx in range(0, len(ordner_liste), 2):
+        t_cols = st.columns(2)
+        with t_cols[0]:
+            st.markdown(baue_themen_fortschritt_html(ordner_liste[idx]), unsafe_allow_html=True)
+        if idx + 1 < len(ordner_liste):
+            with t_cols[1]:
+                st.markdown(baue_themen_fortschritt_html(ordner_liste[idx + 1]), unsafe_allow_html=True)
+
+st.markdown("<div style='height:1.05rem;'></div>", unsafe_allow_html=True)
 
 tab_lernen, tab_upload, tab_ordner = st.tabs([
     "🎯 Lernen (Spaced Repetition)",
@@ -613,7 +1543,10 @@ tab_lernen, tab_upload, tab_ordner = st.tabs([
 # TAB 1: LERNEN (SPACED REPETITION)
 # ==============================================================================
 with tab_lernen:
-    col_f, col_m = st.columns([2, 2])
+    if st.session_state.last_xp_event:
+        st.markdown(f'<div class="xp-banner">{st.session_state.last_xp_event}</div>', unsafe_allow_html=True)
+
+    col_f, col_m, col_btn = st.columns([2.2, 2.2, 1.4])
     ordner_optionen = {"Alle Ordner": None}
     for o in ordner_liste:
         ordner_optionen[f"{o['name']} ({o['due_cards']} fällig)"] = o["id"]
@@ -629,14 +1562,17 @@ with tab_lernen:
     gewaehlter_modus_label = col_m.selectbox("Lernmodus", list(modus_optionen.keys()))
     gewaehlter_modus = modus_optionen[gewaehlter_modus_label]
 
-    if st.button("▶ Lernsitzung starten / neu laden", use_container_width=True):
-        karten = lade_lernkarten(folder_id=gewaehlter_ordner_id, modus=gewaehlter_modus)
-        st.session_state.study_queue = list(karten)
-        st.session_state.study_show_answer = False
-        st.session_state.study_done_count = 0
-        st.session_state.study_initial_total = len(karten)
-        st.session_state.study_label = f"{gewaehlter_ordner_label} · {gewaehlter_modus_label}"
-        st.rerun()
+    with col_btn:
+        st.markdown("<div style='height:1.72rem;'></div>", unsafe_allow_html=True)
+        if st.button("▶ Sitzung starten", use_container_width=True):
+            karten = lade_lernkarten(folder_id=gewaehlter_ordner_id, modus=gewaehlter_modus)
+            st.session_state.study_queue = list(karten)
+            st.session_state.study_show_answer = False
+            st.session_state.study_done_count = 0
+            st.session_state.study_initial_total = len(karten)
+            st.session_state.study_label = f"{gewaehlter_ordner_label} · {gewaehlter_modus_label}"
+            st.session_state.last_xp_event = None
+            st.rerun()
 
     st.markdown("---")
 
@@ -648,6 +1584,11 @@ with tab_lernen:
 
         st.progress(erledigt / gesamt_sitzung, text=f"Fortschritt: {erledigt} abgeschlossen · {rest} verbleibend")
 
+        war_neu = (int(aktuelle_karte.get("success_count", 0)) == 0)
+        aktueller_streak_bonus = 2 if answer_streak >= 20 else (1 if answer_streak >= 10 else 0)
+        moegliche_xp = (2 if war_neu else 1) + aktueller_streak_bonus
+        xp_badge = f'<span class="flashcard-badge-xp">+{moegliche_xp} XP bei Erfolg</span>'
+
         warn_badge = ""
         if aktuelle_karte.get("lapses", 0) > 0:
             warn_badge = f'<span class="flashcard-badge-warn">Wiederholung ({aktuelle_karte["lapses"]}× falsch)</span>'
@@ -657,6 +1598,7 @@ with tab_lernen:
             f"""
             <div class="flashcard-box">
                 <span class="flashcard-badge">{aktuelle_karte['folder_name']} · {aktuelle_karte['card_type']}</span>
+                {xp_badge}
                 {warn_badge}
                 <div class="flashcard-question">{frage_html}</div>
             </div>
@@ -693,13 +1635,13 @@ with tab_lernen:
 
             antwort_html = aktuelle_karte["answer"].replace("\n", "<br>")
             erklaerung = aktuelle_karte.get("explanation", "").strip()
-            erklaerung_html = f"<br><br><span style='color:#7DD3FC;font-size:0.95rem;'>💡 {erklaerung}</span>" if erklaerung else ""
+            erklaerung_html = f"<br><br><span style='color:#7DD3FC;font-size:0.96rem;'>💡 {erklaerung}</span>" if erklaerung else ""
 
             st.markdown(
                 f"""
                 <div class="flashcard-box" style="border-color:#7DD3FC;">
-                    <div style="font-size:0.78rem;color:#7DD3FC;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem;">Lösung</div>
-                    <div style="font-size:1.1rem;color:#F8FAFC;line-height:1.6;">{antwort_html}{erklaerung_html}</div>
+                    <div style="font-size:0.78rem;color:#7DD3FC;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.45rem;font-weight:700;">Lösung</div>
+                    <div style="font-size:1.12rem;color:#F8FAFC;line-height:1.62;">{antwort_html}{erklaerung_html}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -731,11 +1673,24 @@ with tab_lernen:
                     aktuelle_karte["lapses"],
                     gewaehlte_bewertung,
                 )
-                aktualisiere_karte_sm2(aktuelle_karte["id"], ef, iv, reps, lapses, next_rev)
+
+                erfolgreich = (gewaehlte_bewertung in (2, 3, 4))
+                alter_success_count = int(aktuelle_karte.get("success_count", 0))
+                war_erste_loesung = (erfolgreich and alter_success_count == 0)
+                neuer_success_count = alter_success_count + (1 if erfolgreich else 0)
+
+                aktualisiere_karte_sm2(
+                    aktuelle_karte["id"], ef, iv, reps, lapses, next_rev, neuer_success_count
+                )
+
+                xp_ergebnis = verarbeite_antwort_xp(
+                    erfolgreich=erfolgreich,
+                    war_erste_loesung=war_erste_loesung,
+                )
+                st.session_state.last_xp_event = xp_ergebnis["text"]
 
                 fertige_karte = st.session_state.study_queue.pop(0)
                 if gewaehlte_bewertung == 1:
-                    # Falsch -> Karte bleibt in der aktuellen Sitzung und kommt nach 2 Karten wieder
                     fertige_karte["ease_factor"] = ef
                     fertige_karte["interval_days"] = iv
                     fertige_karte["repetitions"] = reps
@@ -754,7 +1709,7 @@ with tab_lernen:
         elif gesamt_karten == 0:
             st.info("Du hast noch keine Karteikarten erstellt. Lege unter **Dokumente & Kartengenerator** deinen ersten Ordner an und lade ein Skript hoch.")
         else:
-            st.info("Klicke oben auf **Lernsitzung starten**, um deine fälligen Karten abzurufen.")
+            st.info("Klicke oben auf **▶ Sitzung starten**, um deine fälligen Karten abzurufen.")
 
 # ==============================================================================
 # TAB 2: DOKUMENTE HOCHLADEN & KARTEIKARTEN GENERIEREN
@@ -762,7 +1717,7 @@ with tab_lernen:
 with tab_upload:
     st.markdown('<div class="ar-subtitle">1. Zielordner auswählen oder neu anlegen</div>', unsafe_allow_html=True)
 
-    col_new1, col_new2 = st.columns([3, 1])
+    col_new1, col_new2 = st.columns([3.5, 1])
     neuer_ordner_name = col_new1.text_input("Neuen Ordner anlegen", label_visibility="collapsed", placeholder="Neuen Ordnernamen eingeben (z. B. Makroökonomie, BGB AT)...")
     if col_new2.button("➕ Ordner erstellen", use_container_width=True):
         if neuer_ordner_name.strip():
@@ -833,11 +1788,14 @@ with tab_ordner:
         auswahl_label = st.selectbox("Ordner inspizieren", list(verw_ordner_map.keys()))
         akt_ordner = verw_ordner_map[auswahl_label]
 
+        # Detaillierter Anki-Fortschrittsbalken für diesen Ordner
+        st.markdown(baue_themen_fortschritt_html(akt_ordner), unsafe_allow_html=True)
+
         st.markdown('<div class="ar-subtitle">Hinterlegte Dokumente in diesem Ordner</div>', unsafe_allow_html=True)
         doks = lade_dokumente_fuer_ordner(akt_ordner["id"])
         if doks:
             for d in doks:
-                datum_str = d["uploaded_at"].astimezone(ZoneInfo("Europe/Berlin")).strftime("%d.%m.%Y %H:%M")
+                datum_str = d["uploaded_at"].astimezone(BERLIN_TZ).strftime("%d.%m.%Y %H:%M")
                 st.markdown(f"- **{d['filename']}** ({d['card_count']} Karten · hochgeladen am {datum_str})")
         else:
             st.caption("In diesem Ordner wurden noch keine Dokumente hochgeladen.")
@@ -845,19 +1803,51 @@ with tab_ordner:
         st.markdown("---")
 
         st.markdown('<div class="ar-subtitle">Enthaltene Karteikarten & Spaced-Repetition-Status</div>', unsafe_allow_html=True)
+        status_filter = st.radio(
+            "Nach Anki-Status filtern:",
+            [
+                "Alle Karten",
+                "🔵 Gut gelernt",
+                "🟡 Wackelig",
+                "🔴 Kritisch / Öfter falsch",
+                "⚫ Ungelernt",
+            ],
+            horizontal=True,
+        )
+
+        filter_map = {
+            "🔵 Gut gelernt": "gut",
+            "🟡 Wackelig": "wackelig",
+            "🔴 Kritisch / Öfter falsch": "kritisch",
+            "⚫ Ungelernt": "neu",
+        }
+        badge_map = {
+            "gut": "🔵 Gut gelernt",
+            "wackelig": "🟡 Wackelig",
+            "kritisch": "🔴 Kritisch",
+            "neu": "⚫ Ungelernt",
+        }
+
         alle_karten_ordner = lade_lernkarten(folder_id=akt_ordner["id"], modus="all")
         if alle_karten_ordner:
             jetzt_utc = datetime.datetime.now(datetime.timezone.utc)
-            for k in alle_karten_ordner:
+            gefilterte_karten = [
+                k for k in alle_karten_ordner
+                if status_filter == "Alle Karten" or klassifiziere_karte_anki(k) == filter_map[status_filter]
+            ]
+            if not gefilterte_karten:
+                st.caption("Keine Karten in dieser Kategorie vorhanden.")
+            for k in gefilterte_karten:
+                anki_kat = klassifiziere_karte_anki(k)
                 faellig = k["next_review"] <= jetzt_utc
-                status_txt = "Jetzt fällig" if faellig else f"Fällig am {k['next_review'].astimezone(ZoneInfo('Europe/Berlin')).strftime('%d.%m.%Y')}"
+                status_txt = "Jetzt fällig" if faellig else f"Fällig am {k['next_review'].astimezone(BERLIN_TZ).strftime('%d.%m.%Y')}"
                 fehler_txt = f" · {k['lapses']}× falsch" if k["lapses"] > 0 else ""
-                with st.expander(f"[{k['card_type']}] {k['question'][:85]} ({status_txt}{fehler_txt})"):
+                with st.expander(f"{badge_map[anki_kat]} · [{k['card_type']}] {k['question'][:80]} ({status_txt}{fehler_txt})"):
                     st.markdown(f"**Frage:** {k['question']}")
                     st.markdown(f"**Antwort:** {k['answer']}")
                     if k.get("explanation"):
                         st.caption(f"Erklärung: {k['explanation']}")
-                    st.caption(f"Intervall: {k['interval_days']} Tage · Leichtigkeit: {k['ease_factor']:.2f}")
+                    st.caption(f"Intervall: {k['interval_days']} Tage · Wiederholungen: {k['repetitions']} · Leichtigkeit: {k['ease_factor']:.2f}")
                     if st.button("Karte löschen", key=f"del_card_{k['id']}"):
                         loesche_karte(k["id"])
                         st.rerun()
