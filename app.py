@@ -4,11 +4,14 @@ import re
 import html
 import json
 import time
+import queue
+import threading
 import urllib.parse
 import datetime
 from zoneinfo import ZoneInfo
 import streamlit as st
 import psycopg2
+from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
 import google.generativeai as genai
 from pypdf import PdfReader
@@ -280,7 +283,6 @@ st.markdown(
         margin-bottom: 0.55rem;
     }
 
-    /* Plastische 3D-Karten für Level & Tagesquest */
     .sculpt-panel {
         background: linear-gradient(165deg, #11192B 0%, #0A0F1A 100%);
         border: 1px solid rgba(125, 211, 252, 0.26);
@@ -334,7 +336,7 @@ st.markdown(
         border-radius: 999px;
         background: linear-gradient(90deg, #0284C7 0%, #38BDF8 55%, #BAE6FD 100%);
         box-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
-        transition: width 0.35s ease;
+        transition: width 0.25s ease;
     }
 
     .progress-fill-quest {
@@ -342,7 +344,7 @@ st.markdown(
         border-radius: 999px;
         background: linear-gradient(90deg, #0EA5E9 0%, #7DD3FC 100%);
         box-shadow: 0 0 12px rgba(125, 211, 252, 0.45);
-        transition: width 0.35s ease;
+        transition: width 0.25s ease;
     }
 
     .panel-footer-row {
@@ -396,7 +398,6 @@ st.markdown(
         box-shadow: 0 0 8px rgba(125, 211, 252, 0.65);
     }
 
-    /* Plastische 3D-Metrik-Kacheln */
     .stat-card {
         background: linear-gradient(165deg, #101727 0%, #090D16 100%);
         border: 1px solid rgba(125, 211, 252, 0.24);
@@ -406,12 +407,6 @@ st.markdown(
         box-shadow:
             0 12px 26px rgba(0, 0, 0, 0.48),
             inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        transition: transform 0.18s ease, border-color 0.18s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(125, 211, 252, 0.5);
     }
 
     .stat-num {
@@ -430,7 +425,6 @@ st.markdown(
         letter-spacing: 0.02em;
     }
 
-    /* Themen-Fortschrittskarten (Anki-Logik) */
     .topic-card {
         background: linear-gradient(165deg, #101829 0%, #090D16 100%);
         border: 1px solid rgba(125, 211, 252, 0.24);
@@ -503,25 +497,25 @@ st.markdown(
     .anki-seg-gut {
         height: 100%;
         background: linear-gradient(90deg, #0284C7 0%, #38BDF8 65%, #7DD3FC 100%);
-        transition: width 0.35s ease;
+        transition: width 0.25s ease;
     }
 
     .anki-seg-wackelig {
         height: 100%;
         background: linear-gradient(90deg, #EAB308 0%, #FACC15 100%);
-        transition: width 0.35s ease;
+        transition: width 0.25s ease;
     }
 
     .anki-seg-kritisch {
         height: 100%;
         background: linear-gradient(90deg, #DC2626 0%, #F87171 100%);
-        transition: width 0.35s ease;
+        transition: width 0.25s ease;
     }
 
     .anki-seg-neu {
         height: 100%;
         background: #172033;
-        transition: width 0.35s ease;
+        transition: width 0.25s ease;
     }
 
     .anki-legend-row {
@@ -549,7 +543,6 @@ st.markdown(
     .dot-kritisch { background: #F87171; }
     .dot-neu { background: #334155; border: 1px solid #64748B; }
 
-    /* Plastische Karteikarten-Box (normale, klare Typografie) */
     .flashcard-box {
         background: linear-gradient(160deg, #11192C 0%, #0A0F1B 100%);
         border: 1.5px solid rgba(125, 211, 252, 0.48);
@@ -640,7 +633,6 @@ st.markdown(
         line-height: 1.55;
     }
 
-    /* Lückentext-Platzhalter */
     .cloze-blank {
         display: inline-block;
         min-width: 96px;
@@ -655,7 +647,6 @@ st.markdown(
         letter-spacing: 0.08em;
     }
 
-    /* Multiple-Choice Auswahlkarten */
     div[data-testid="stRadio"] > div[role="radiogroup"] {
         gap: 0.6rem;
         margin-top: 0.4rem;
@@ -668,12 +659,11 @@ st.markdown(
         border-radius: 12px !important;
         padding: 0.75rem 1.05rem !important;
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38) !important;
-        transition: border-color 0.15s ease, transform 0.15s ease !important;
+        transition: border-color 0.12s ease !important;
     }
 
     div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover {
         border-color: #7DD3FC !important;
-        transform: translateY(-1px) !important;
     }
 
     .xp-banner {
@@ -722,19 +712,12 @@ st.markdown(
         box-shadow:
             0 6px 16px rgba(0, 0, 0, 0.42),
             inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-        transition: all 0.15s ease !important;
+        transition: border-color 0.12s ease, background 0.12s ease !important;
     }
     .stButton > button:hover {
         border-color: #7DD3FC !important;
         background: linear-gradient(180deg, #1B2A47 0%, #111B30 100%) !important;
         color: #FFFFFF !important;
-        transform: translateY(-1px) !important;
-        box-shadow:
-            0 8px 20px rgba(2, 132, 199, 0.22),
-            inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
-    }
-    .stButton > button:active {
-        transform: translateY(1px) !important;
     }
     </style>
     """,
@@ -769,7 +752,7 @@ def passwort_pruefen():
 
 passwort_pruefen()
 
-# --- Datenbank-Verbindung (Neon PostgreSQL mit Auto-Wakeup Retry) ---
+# --- Persistenter Connection-Pool & Asynchroner FIFO-Hintergrund-Writer ---
 def get_db_url():
     try:
         url = st.secrets["DATABASE_URL"].strip()
@@ -779,22 +762,82 @@ def get_db_url():
         url = url.replace("postgres://", "postgresql://", 1)
     return url
 
-def get_connection():
+@st.cache_resource
+def get_db_pool():
     db_url = get_db_url()
     if not db_url:
         raise RuntimeError("DATABASE_URL fehlt in den Streamlit Secrets.")
+    return pool.ThreadedConnectionPool(minconn=1, maxconn=6, dsn=db_url, connect_timeout=15)
+
+def get_connection():
+    p = get_db_pool()
     last_err = None
     for _ in range(3):
+        conn = None
         try:
-            return psycopg2.connect(db_url, connect_timeout=15)
+            conn = p.getconn()
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1;")
+            return conn
         except Exception as e:
             last_err = e
-            time.sleep(1.2)
+            if conn is not None:
+                try:
+                    p.putconn(conn, close=True)
+                except Exception:
+                    pass
+            time.sleep(0.4)
     raise last_err
+
+def release_connection(conn, broken: bool = False):
+    if conn is None:
+        return
+    try:
+        get_db_pool().putconn(conn, close=broken)
+    except Exception:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+@st.cache_resource
+def get_bg_db_queue():
+    q = queue.Queue()
+
+    def _worker():
+        while True:
+            task = q.get()
+            conn = None
+            broken = False
+            try:
+                conn = get_connection()
+                with conn.cursor() as cur:
+                    for sql, params in task:
+                        cur.execute(sql, params)
+                conn.commit()
+            except Exception:
+                broken = True
+                if conn is not None:
+                    try:
+                        conn.rollback()
+                    except Exception:
+                        pass
+            finally:
+                release_connection(conn, broken=broken)
+                q.task_done()
+
+    t = threading.Thread(target=_worker, daemon=True)
+    t.start()
+    return q
+
+def enqueue_db_writes(statements: list):
+    """Reiht SQL-Schreibbefehle verzögerungsfrei (0 ms UI-Wartezeit) in die Hintergrund-Queue ein."""
+    get_bg_db_queue().put(statements)
 
 @st.cache_resource
 def init_db():
     conn = get_connection()
+    broken = False
     try:
         with conn.cursor() as cur:
             cur.execute("""
@@ -860,8 +903,11 @@ def init_db():
                 ON CONFLICT (id) DO NOTHING;
             """)
         conn.commit()
+    except Exception:
+        broken = True
+        raise
     finally:
-        conn.close()
+        release_connection(conn, broken=broken)
     return True
 
 try:
@@ -871,12 +917,13 @@ except Exception as e:
     st.info("Prüfe in Streamlit unter **Settings → Secrets**, ob `DATABASE_URL` korrekt eingetragen ist.")
     st.stop()
 
-# --- Fortschritt, XP, Quests & Cursor-Datenbankfunktionen ---
-def lade_user_progress():
+# --- Fortschritt, XP, Quests & Cursor-Logik (In-Memory Cache + Async DB Sync) ---
+def lade_user_progress_aus_db() -> dict:
     heute_berlin = datetime.datetime.now(BERLIN_TZ).date()
     gestern_berlin = heute_berlin - datetime.timedelta(days=1)
 
     conn = get_connection()
+    broken = False
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("SELECT * FROM user_progress WHERE id = 1;")
@@ -921,15 +968,125 @@ def lade_user_progress():
                 row = cur.fetchone()
         conn.commit()
         return dict(row)
+    except Exception:
+        broken = True
+        raise
     finally:
-        conn.close()
+        release_connection(conn, broken=broken)
 
-def verarbeite_antwort_xp(erfolgreich: bool, war_erste_loesung: bool) -> dict:
+def hole_user_progress_schnell() -> dict:
+    heute_berlin = datetime.datetime.now(BERLIN_TZ).date()
+    if "cached_user_progress" not in st.session_state:
+        st.session_state.cached_user_progress = lade_user_progress_aus_db()
+    elif st.session_state.cached_user_progress.get("stats_date") != heute_berlin:
+        st.session_state.cached_user_progress = lade_user_progress_aus_db()
+    return st.session_state.cached_user_progress
+
+def lade_ordner_aus_db() -> list:
+    conn = get_connection()
+    broken = False
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""
+                SELECT
+                    f.id,
+                    f.name,
+                    COUNT(DISTINCT d.id) AS doc_count,
+                    COUNT(DISTINCT c.id) AS total_cards,
+                    COUNT(DISTINCT CASE WHEN c.next_review <= NOW() THEN c.id END) AS due_cards,
+                    COUNT(DISTINCT CASE WHEN c.lapses > 0 THEN c.id END) AS weak_cards,
+                    COUNT(DISTINCT CASE
+                        WHEN c.id IS NOT NULL
+                         AND c.repetitions = 0
+                         AND c.lapses = 0
+                         AND COALESCE(c.success_count, 0) = 0
+                        THEN c.id
+                    END) AS neu_cards,
+                    COUNT(DISTINCT CASE
+                        WHEN c.id IS NOT NULL
+                         AND (c.lapses >= 2 OR (c.lapses >= 1 AND c.repetitions = 0))
+                        THEN c.id
+                    END) AS kritisch_cards,
+                    COUNT(DISTINCT CASE
+                        WHEN c.id IS NOT NULL
+                         AND NOT (c.lapses >= 2 OR (c.lapses >= 1 AND c.repetitions = 0))
+                         AND c.repetitions >= 2
+                         AND c.interval_days >= 6
+                        THEN c.id
+                    END) AS gut_cards,
+                    COUNT(DISTINCT CASE
+                        WHEN c.id IS NOT NULL
+                         AND NOT (c.repetitions = 0 AND c.lapses = 0 AND COALESCE(c.success_count, 0) = 0)
+                         AND NOT (c.lapses >= 2 OR (c.lapses >= 1 AND c.repetitions = 0))
+                         AND NOT (c.repetitions >= 2 AND c.interval_days >= 6)
+                        THEN c.id
+                    END) AS wackelig_cards
+                FROM folders f
+                LEFT JOIN documents d ON d.folder_id = f.id
+                LEFT JOIN cards c ON c.folder_id = f.id
+                GROUP BY f.id, f.name
+                ORDER BY f.name ASC;
+            """)
+            return [dict(r) for r in cur.fetchall()]
+    except Exception:
+        broken = True
+        raise
+    finally:
+        release_connection(conn, broken=broken)
+
+def hole_ordner_schnell(force_refresh: bool = False) -> list:
+    if force_refresh or "cached_ordner_liste" not in st.session_state:
+        st.session_state.cached_ordner_liste = lade_ordner_aus_db()
+    return st.session_state.cached_ordner_liste
+
+def invalidiere_ordner_cache():
+    if "cached_ordner_liste" in st.session_state:
+        del st.session_state["cached_ordner_liste"]
+
+def verarbeite_bewertung_sofort(
+    aktuelle_karte: dict,
+    ef: float,
+    iv: int,
+    reps: int,
+    lapses: int,
+    next_rev: datetime.datetime,
+    neuer_success_count: int,
+    erfolgreich: bool,
+    war_erste_loesung: bool,
+) -> str:
+    """
+    Aktualisiert Karte, XP/Level/Streak und Themen-Statistiken sofort im RAM (0 ms Wartezeit)
+    und übergibt die SQL-Updates asynchron an den Hintergrund-Worker.
+    """
     heute_berlin = datetime.datetime.now(BERLIN_TZ).date()
     gestern_berlin = heute_berlin - datetime.timedelta(days=1)
+    jetzt_utc = datetime.datetime.now(datetime.timezone.utc)
 
-    prog = lade_user_progress()
+    # 1. Themen-Fortschritt im Speicher live aktualisieren
+    alter_status = klassifiziere_karte_anki(aktuelle_karte)
+    war_faellig = (aktuelle_karte["next_review"] <= jetzt_utc)
 
+    aktuelle_karte["ease_factor"] = ef
+    aktuelle_karte["interval_days"] = iv
+    aktuelle_karte["repetitions"] = reps
+    aktuelle_karte["lapses"] = lapses
+    aktuelle_karte["next_review"] = next_rev
+    aktuelle_karte["success_count"] = neuer_success_count
+
+    neuer_status = klassifiziere_karte_anki(aktuelle_karte)
+    ist_jetzt_faellig = (next_rev <= jetzt_utc)
+
+    for o in hole_ordner_schnell():
+        if o["id"] == aktuelle_karte["folder_id"]:
+            if war_faellig and not ist_jetzt_faellig:
+                o["due_cards"] = max(0, int(o["due_cards"]) - 1)
+            if alter_status != neuer_status:
+                o[f"{alter_status}_cards"] = max(0, int(o[f"{alter_status}_cards"]) - 1)
+                o[f"{neuer_status}_cards"] = int(o[f"{neuer_status}_cards"]) + 1
+            break
+
+    # 2. XP, Level, Streaks & Tagesquest im Speicher berechnen
+    prog = hole_user_progress_schnell()
     level = int(prog["level"])
     xp_in_level = int(prog["xp_in_level"])
     total_xp = int(prog["total_xp"])
@@ -959,9 +1116,7 @@ def verarbeite_antwort_xp(erfolgreich: bool, war_erste_loesung: bool) -> dict:
         else:
             streak_bonus = 0
 
-        karten_xp = basis_xp + streak_bonus
-        xp_gewinn += karten_xp
-
+        xp_gewinn += basis_xp + streak_bonus
         details = [f"+{basis_xp} XP ({'Erst-Erfolg' if war_erste_loesung else 'Wiederholung'})"]
         if streak_bonus > 0:
             details.append(f"+{streak_bonus} XP ({answer_streak}er-Streak)")
@@ -1008,59 +1163,78 @@ def verarbeite_antwort_xp(erfolgreich: bool, war_erste_loesung: bool) -> dict:
                 selected_cursor_level = -1
                 ereignisse.append(f"✨ Neues Maus-Symbol freigeschaltet: {neues_symbol['name']}!")
 
-    conn = get_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                UPDATE user_progress
-                SET level = %s,
-                    xp_in_level = %s,
-                    total_xp = %s,
-                    answer_streak = %s,
-                    best_answer_streak = %s,
-                    daily_cards_done = %s,
-                    daily_quest_claimed = %s,
-                    stats_date = %s,
-                    daily_quest_streak = %s,
-                    last_quest_completed_date = %s,
-                    selected_cursor_level = %s
-                WHERE id = 1;
-                """,
-                (
-                    level,
-                    xp_in_level,
-                    total_xp,
-                    answer_streak,
-                    best_answer_streak,
-                    daily_cards_done,
-                    daily_quest_claimed,
-                    heute_berlin,
-                    daily_quest_streak,
-                    last_completed,
-                    selected_cursor_level,
-                ),
-            )
-        conn.commit()
-    finally:
-        conn.close()
+    prog.update({
+        "level": level,
+        "xp_in_level": xp_in_level,
+        "total_xp": total_xp,
+        "answer_streak": answer_streak,
+        "best_answer_streak": best_answer_streak,
+        "daily_cards_done": daily_cards_done,
+        "daily_quest_claimed": daily_quest_claimed,
+        "stats_date": heute_berlin,
+        "daily_quest_streak": daily_quest_streak,
+        "last_quest_completed_date": last_completed,
+        "selected_cursor_level": selected_cursor_level,
+    })
 
-    return {
-        "xp_gewinn": xp_gewinn,
-        "text": "  |  ".join(ereignisse),
-    }
+    # 3. Beide Datenbank-Updates gebündelt & asynchron im Hintergrund speichern
+    enqueue_db_writes([
+        (
+            """
+            UPDATE cards
+            SET ease_factor = %s,
+                interval_days = %s,
+                repetitions = %s,
+                lapses = %s,
+                next_review = %s,
+                success_count = %s
+            WHERE id = %s;
+            """,
+            (ef, iv, reps, lapses, next_rev, neuer_success_count, aktuelle_karte["id"]),
+        ),
+        (
+            """
+            UPDATE user_progress
+            SET level = %s,
+                xp_in_level = %s,
+                total_xp = %s,
+                answer_streak = %s,
+                best_answer_streak = %s,
+                daily_cards_done = %s,
+                daily_quest_claimed = %s,
+                stats_date = %s,
+                daily_quest_streak = %s,
+                last_quest_completed_date = %s,
+                selected_cursor_level = %s
+            WHERE id = 1;
+            """,
+            (
+                level,
+                xp_in_level,
+                total_xp,
+                answer_streak,
+                best_answer_streak,
+                daily_cards_done,
+                daily_quest_claimed,
+                heute_berlin,
+                daily_quest_streak,
+                last_completed,
+                selected_cursor_level,
+            ),
+        ),
+    ])
+
+    return "  |  ".join(ereignisse)
 
 def setze_ausgewaehlten_cursor(cursor_level: int):
-    conn = get_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute("UPDATE user_progress SET selected_cursor_level = %s WHERE id = 1;", (cursor_level,))
-        conn.commit()
-    finally:
-        conn.close()
+    prog = hole_user_progress_schnell()
+    prog["selected_cursor_level"] = cursor_level
+    enqueue_db_writes([
+        ("UPDATE user_progress SET selected_cursor_level = %s WHERE id = 1;", (cursor_level,))
+    ])
 
 # --- Benutzer-Fortschritt laden & freigeschaltetes Maus-Symbol anwenden ---
-user_prog = lade_user_progress()
+user_prog = hole_user_progress_schnell()
 aktuelles_level = int(user_prog["level"])
 aktiver_cursor = ermittle_aktiven_cursor(aktuelles_level, int(user_prog["selected_cursor_level"]))
 
@@ -1072,7 +1246,7 @@ if aktiver_cursor["svg"]:
         unsafe_allow_html=True,
     )
 
-# --- Gemini API Initialisierung (volle Flash-Modelle für starke Aufgabenvielfalt) ---
+# --- Gemini API Initialisierung ---
 @st.cache_resource
 def init_gemini():
     try:
@@ -1146,7 +1320,7 @@ def extrahiere_text_aus_datei(uploaded_file):
                 continue
         return ""
 
-# --- Active-Recall Kartengenerator mit garantierter Aufgabenvielfalt ---
+# --- Active-Recall Kartengenerator ---
 def generiere_karteikarten(text_inhalt, anzahl, aufgabentypen):
     gekuerzter_text = text_inhalt[:28000]
     typen_beschreibung = {
@@ -1194,11 +1368,6 @@ def generiere_karteikarten(text_inhalt, anzahl, aufgabentypen):
         "2. Schreibe alle Fragen, Lückentexte und Problemstellungen als normalen, gut lesbaren Fließtext (ohne Code-Blöcke).\n"
         "3. Bei 'Multiple Choice' MÜSSEN im Feld 'options' immer genau 4 verschiedene Antwortmöglichkeiten stehen!\n"
         "4. Antworte AUSSCHLIESSLICH mit einem gültigen JSON-Array (ohne ```json).\n\n"
-        "Beispiel für die JSON-Struktur:\n"
-        '[\n'
-        '  {"card_type": "Lückentext", "question": "Sinkt der Leitzins, werden Kredite günstiger und die gesamtwirtschaftliche ______ steigt.", "options": [], "answer": "Investitionsnachfrage (Vollständiger Satz: ...)", "explanation": "Niedrigere Zinsen senken die Finanzierungskosten."},\n'
-        '  {"card_type": "Multiple Choice", "question": "Welcher Effekt tritt ein, wenn der Preis eines superioren Gutes steigt?", "options": ["Sowohl Substitutions- als auch Einkommenseffekt senken die Nachfrage", "Nur der Substitutionseffekt wirkt negativ", "Die Nachfrage steigt durch den Giffen-Effekt", "Beide Effekte heben sich immer vollständig auf"], "answer": "Sowohl Substitutions- als auch Einkommenseffekt senken die Nachfrage", "explanation": "Bei normalen/superioren Gütern wirken beide Effekte in dieselbe Richtung."}\n'
-        ']\n\n'
         f"LERNMATERIAL:\n{gekuerzter_text}"
     )
 
@@ -1308,57 +1477,10 @@ def formatiere_intervall_vorschau(ease_factor, interval_days, repetitions, lapse
     else:
         return f"{iv} Tage"
 
-# --- Datenbank-Hilfsfunktionen inkl. Anki-Themen-Statistiken ---
-def lade_ordner():
-    conn = get_connection()
-    try:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("""
-                SELECT
-                    f.id,
-                    f.name,
-                    COUNT(DISTINCT d.id) AS doc_count,
-                    COUNT(DISTINCT c.id) AS total_cards,
-                    COUNT(DISTINCT CASE WHEN c.next_review <= NOW() THEN c.id END) AS due_cards,
-                    COUNT(DISTINCT CASE WHEN c.lapses > 0 THEN c.id END) AS weak_cards,
-                    COUNT(DISTINCT CASE
-                        WHEN c.id IS NOT NULL
-                         AND c.repetitions = 0
-                         AND c.lapses = 0
-                         AND COALESCE(c.success_count, 0) = 0
-                        THEN c.id
-                    END) AS neu_cards,
-                    COUNT(DISTINCT CASE
-                        WHEN c.id IS NOT NULL
-                         AND (c.lapses >= 2 OR (c.lapses >= 1 AND c.repetitions = 0))
-                        THEN c.id
-                    END) AS kritisch_cards,
-                    COUNT(DISTINCT CASE
-                        WHEN c.id IS NOT NULL
-                         AND NOT (c.lapses >= 2 OR (c.lapses >= 1 AND c.repetitions = 0))
-                         AND c.repetitions >= 2
-                         AND c.interval_days >= 6
-                        THEN c.id
-                    END) AS gut_cards,
-                    COUNT(DISTINCT CASE
-                        WHEN c.id IS NOT NULL
-                         AND NOT (c.repetitions = 0 AND c.lapses = 0 AND COALESCE(c.success_count, 0) = 0)
-                         AND NOT (c.lapses >= 2 OR (c.lapses >= 1 AND c.repetitions = 0))
-                         AND NOT (c.repetitions >= 2 AND c.interval_days >= 6)
-                        THEN c.id
-                    END) AS wackelig_cards
-                FROM folders f
-                LEFT JOIN documents d ON d.folder_id = f.id
-                LEFT JOIN cards c ON c.folder_id = f.id
-                GROUP BY f.id, f.name
-                ORDER BY f.name ASC;
-            """)
-            return cur.fetchall()
-    finally:
-        conn.close()
-
+# --- Datenbank-Schreiboperationen (für Verwaltung & Upload) ---
 def erstelle_ordner(name):
     conn = get_connection()
+    broken = False
     try:
         with conn.cursor() as cur:
             cur.execute(
@@ -1367,21 +1489,31 @@ def erstelle_ordner(name):
             )
             res = cur.fetchone()
         conn.commit()
+        invalidiere_ordner_cache()
         return res is not None
+    except Exception:
+        broken = True
+        raise
     finally:
-        conn.close()
+        release_connection(conn, broken=broken)
 
 def loesche_ordner(folder_id):
     conn = get_connection()
+    broken = False
     try:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM folders WHERE id = %s;", (folder_id,))
         conn.commit()
+        invalidiere_ordner_cache()
+    except Exception:
+        broken = True
+        raise
     finally:
-        conn.close()
+        release_connection(conn, broken=broken)
 
 def lade_dokumente_fuer_ordner(folder_id):
     conn = get_connection()
+    broken = False
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
@@ -1392,12 +1524,16 @@ def lade_dokumente_fuer_ordner(folder_id):
                 GROUP BY d.id
                 ORDER BY d.uploaded_at DESC;
             """, (folder_id,))
-            return cur.fetchall()
+            return [dict(r) for r in cur.fetchall()]
+    except Exception:
+        broken = True
+        raise
     finally:
-        conn.close()
+        release_connection(conn, broken=broken)
 
 def speichere_dokument_und_karten(folder_id, filename, char_count, karten_liste, content_text=""):
     conn = get_connection()
+    broken = False
     try:
         with conn.cursor() as cur:
             cur.execute(
@@ -1422,11 +1558,16 @@ def speichere_dokument_und_karten(folder_id, filename, char_count, karten_liste,
                     )
                 )
         conn.commit()
+        invalidiere_ordner_cache()
+    except Exception:
+        broken = True
+        raise
     finally:
-        conn.close()
+        release_connection(conn, broken=broken)
 
 def fuege_karten_zu_dokument_hinzu(folder_id, doc_id, karten_liste):
     conn = get_connection()
+    broken = False
     try:
         with conn.cursor() as cur:
             for k in karten_liste:
@@ -1446,11 +1587,17 @@ def fuege_karten_zu_dokument_hinzu(folder_id, doc_id, karten_liste):
                     )
                 )
         conn.commit()
+        invalidiere_ordner_cache()
+    except Exception:
+        broken = True
+        raise
     finally:
-        conn.close()
+        release_connection(conn, broken=broken)
 
 def lade_lernkarten(folder_id=None, modus="due"):
+    get_bg_db_queue().join()
     conn = get_connection()
+    broken = False
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             bedingungen = []
@@ -1475,39 +1622,26 @@ def lade_lernkarten(folder_id=None, modus="due"):
                     c.id ASC;
             """
             cur.execute(query, tuple(params))
-            return cur.fetchall()
+            return [dict(r) for r in cur.fetchall()]
+    except Exception:
+        broken = True
+        raise
     finally:
-        conn.close()
-
-def aktualisiere_karte_sm2(card_id, ef, interval, reps, lapses, next_review, neu_success_count):
-    conn = get_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                UPDATE cards
-                SET ease_factor = %s,
-                    interval_days = %s,
-                    repetitions = %s,
-                    lapses = %s,
-                    next_review = %s,
-                    success_count = %s
-                WHERE id = %s;
-                """,
-                (ef, interval, reps, lapses, next_review, neu_success_count, card_id)
-            )
-        conn.commit()
-    finally:
-        conn.close()
+        release_connection(conn, broken=broken)
 
 def loesche_karte(card_id):
     conn = get_connection()
+    broken = False
     try:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM cards WHERE id = %s;", (card_id,))
         conn.commit()
+        invalidiere_ordner_cache()
+    except Exception:
+        broken = True
+        raise
     finally:
-        conn.close()
+        release_connection(conn, broken=broken)
 
 # --- Session State ---
 if "study_queue" not in st.session_state:
@@ -1616,8 +1750,8 @@ with col_quest:
 
 st.markdown('<div style="height:0.95rem;"></div>', unsafe_allow_html=True)
 
-# --- Status-Kacheln ---
-ordner_liste = lade_ordner()
+# --- Status-Kacheln (aus In-Memory Cache -> 0 ms Ladezeit) ---
+ordner_liste = hole_ordner_schnell()
 gesamt_karten = sum(o["total_cards"] for o in ordner_liste)
 gesamt_faellig = sum(o["due_cards"] for o in ordner_liste)
 gesamt_schwach = sum(o["kritisch_cards"] for o in ordner_liste)
@@ -1653,7 +1787,7 @@ tab_lernen, tab_upload, tab_ordner = st.tabs([
 ])
 
 # ==============================================================================
-# TAB 1: LERNEN (SPACED REPETITION)
+# TAB 1: LERNEN (SPACED REPETITION – OHNE LADEVERZÖGERUNG)
 # ==============================================================================
 with tab_lernen:
     if st.session_state.last_xp_event:
@@ -1678,6 +1812,7 @@ with tab_lernen:
     with col_btn:
         st.markdown('<div style="height:1.72rem;"></div>', unsafe_allow_html=True)
         if st.button("▶ Sitzung starten", use_container_width=True):
+            hole_ordner_schnell(force_refresh=True)
             karten = lade_lernkarten(folder_id=gewaehlter_ordner_id, modus=gewaehlter_modus)
             st.session_state.study_queue = list(karten)
             st.session_state.study_show_answer = False
@@ -1798,22 +1933,21 @@ with tab_lernen:
                 war_erste_loesung = (erfolgreich and alter_success_count == 0)
                 neuer_success_count = alter_success_count + (1 if erfolgreich else 0)
 
-                aktualisiere_karte_sm2(
-                    aktuelle_karte["id"], ef, iv, reps, lapses, next_rev, neuer_success_count
-                )
+                fertige_karte = st.session_state.study_queue.pop(0)
 
-                xp_ergebnis = verarbeite_antwort_xp(
+                st.session_state.last_xp_event = verarbeite_bewertung_sofort(
+                    aktuelle_karte=fertige_karte,
+                    ef=ef,
+                    iv=iv,
+                    reps=reps,
+                    lapses=lapses,
+                    next_rev=next_rev,
+                    neuer_success_count=neuer_success_count,
                     erfolgreich=erfolgreich,
                     war_erste_loesung=war_erste_loesung,
                 )
-                st.session_state.last_xp_event = xp_ergebnis["text"]
 
-                fertige_karte = st.session_state.study_queue.pop(0)
                 if gewaehlte_bewertung == 1:
-                    fertige_karte["ease_factor"] = ef
-                    fertige_karte["interval_days"] = iv
-                    fertige_karte["repetitions"] = reps
-                    fertige_karte["lapses"] = lapses
                     einfuege_pos = min(2, len(st.session_state.study_queue))
                     st.session_state.study_queue.insert(einfuege_pos, fertige_karte)
                 else:
@@ -1848,7 +1982,7 @@ with tab_upload:
         else:
             st.warning("Bitte gib einen Ordnernamen ein.")
 
-    ordner_liste = lade_ordner()
+    ordner_liste = hole_ordner_schnell()
     if not ordner_liste:
         st.warning("Bitte lege zuerst oben einen Ordner an, in dem deine Dokumente und Karten gespeichert werden.")
     else:
@@ -1893,7 +2027,6 @@ with tab_upload:
 
                 if gesamt_erstellt > 0:
                     st.success(f"{gesamt_erstellt} abwechslungsreiche Lernkarten wurden im Ordner **{ziel_ordner_name}** gespeichert!")
-                    time.sleep(1)
                     st.rerun()
 
 # ==============================================================================
@@ -1907,7 +2040,6 @@ with tab_ordner:
         auswahl_label = st.selectbox("Ordner inspizieren", list(verw_ordner_map.keys()))
         akt_ordner = verw_ordner_map[auswahl_label]
 
-        # Detaillierter Anki-Fortschrittsbalken für diesen Ordner
         st.markdown(baue_themen_fortschritt_html(akt_ordner), unsafe_allow_html=True)
 
         st.markdown('<div class="ar-subtitle">Hinterlegte Dokumente in diesem Ordner</div>', unsafe_allow_html=True)
