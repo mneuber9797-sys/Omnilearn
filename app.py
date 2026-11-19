@@ -42,23 +42,23 @@ def render_dragon_stage(total_meat: int, dragon_event: str, activity_mode: str, 
       .meat{{background:#060911;border:1px solid rgba(125,211,252,.3);padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;color:#FDE68A}}
       .btn{{background:#11192B;border:1px solid rgba(125,211,252,.3);color:#CBD5E1;font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:8px;cursor:pointer}}
       .btn.active{{background:rgba(56,189,248,.22);border-color:#7DD3FC;color:#FFF}}
-      canvas{{width:100%;height:218px;display:block;border-radius:12px;border:1px solid rgba(125,211,252,.22);image-rendering:pixelated}}
+      canvas{{width:100%;height:210px;display:block;border-radius:12px;border:1px solid rgba(125,211,252,.22);image-rendering:pixelated}}
     </style></head><body><div class="shell"><div class="hud"><div class="hl">
       <span class="badge">🐉 Hoher Drache</span><span class="sub">Ankylosaurus-T-Rex-Hybrid</span>
       <div class="meat">🍖 {int(total_meat)} Fleisch</div></div><div class="ctrls">
       <button class="btn" id="bSleep" onclick="setM('sleep')">💤 Schlafen</button>
       <button class="btn" id="bFly" onclick="setM('fly')">🪽 Fliegen</button>
       <button class="btn" id="bRock" onclick="setM('fight_rock')">🪨 Stein-Kampf</button>
-    </div></div><canvas id="c" width="760" height="218"></canvas></div><script>
+    </div></div><canvas id="c" width="760" height="210"></canvas></div><script>
       const D={payload},cv=document.getElementById("c"),ctx=cv.getContext("2d");ctx.imageSmoothingEnabled=false;
-      let mode=D.mode,evT=(D.event==="feed_meat"||D.event==="burn_tree")?2.1:0,SC=4.5;
+      let mode=D.mode,evT=(D.event==="feed_meat"||D.event==="burn_tree")?2.1:0,SC=4.4;
       function setM(m){{mode=m;["Sleep","Fly","Rock"].forEach(k=>document.getElementById("b"+k).className="btn"+((k==="Sleep"&&m==="sleep")||(k==="Fly"&&m==="fly")||(k==="Rock"&&m==="fight_rock")?" active":""));}}setM(mode);
       const px=(bx,by,ox,oy,w,h,col)=>{{ctx.fillStyle=col;ctx.fillRect(Math.round(bx+ox*SC),Math.round(by+oy*SC),Math.ceil(w*SC),Math.ceil(h*SC));}};
       function bg(t,angry){{
-        ctx.fillStyle=angry?"#190B12":"#08101E";ctx.fillRect(0,0,760,218);
-        ctx.fillStyle=angry?"#FCA5A5":"#E0F2FE";for(let i=0;i<22;i++)ctx.fillRect((i*37+19)%745,(i*19+11)%88,i%4?2:3,i%4?2:3);
-        ctx.fillStyle=angry?"#261018":"#0F1A2E";ctx.beginPath();ctx.moveTo(0,162);ctx.lineTo(130,90);ctx.lineTo(260,152);ctx.lineTo(400,78);ctx.lineTo(550,148);ctx.lineTo(680,88);ctx.lineTo(760,152);ctx.lineTo(760,168);ctx.lineTo(0,168);ctx.fill();
-        ctx.fillStyle="#0E172A";ctx.fillRect(0,162,760,56);ctx.fillStyle=angry?"#EF4444":"#38BDF8";ctx.fillRect(0,162,760,2);
+        ctx.fillStyle=angry?"#190B12":"#08101E";ctx.fillRect(0,0,760,210);
+        ctx.fillStyle=angry?"#FCA5A5":"#E0F2FE";for(let i=0;i<22;i++)ctx.fillRect((i*37+19)%745,(i*19+11)%84,i%4?2:3,i%4?2:3);
+        ctx.fillStyle=angry?"#261018":"#0F1A2E";ctx.beginPath();ctx.moveTo(0,156);ctx.lineTo(130,86);ctx.lineTo(260,146);ctx.lineTo(400,74);ctx.lineTo(550,144);ctx.lineTo(680,84);ctx.lineTo(760,148);ctx.lineTo(760,162);ctx.lineTo(0,162);ctx.fill();
+        ctx.fillStyle="#0E172A";ctx.fillRect(0,156,760,54);ctx.fillStyle=angry?"#EF4444":"#38BDF8";ctx.fillRect(0,156,760,2);
       }}
       function boulder(x,y,sx,flash){{
         x+=sx;ctx.fillStyle=flash?"#7DD3FC":"#334155";ctx.fillRect(x,y+18,70,36);
@@ -102,32 +102,32 @@ def render_dragon_stage(total_meat: int, dragon_event: str, activity_mode: str, 
       function loop(now){{
         const el=(now-t0)/1000,tk=Math.floor(el*20);
         if(D.event==="feed_meat"&&evT>0){{
-          const r=Math.max(0,evT-el),pr=1-r/2.1;bg(tk,false);dragon(310,162,tk,"stand",false,pr>.3&&pr<.85,false);
-          if(pr<.6)steak(550-pr*245,70+Math.sin(pr*Math.PI)*-30+pr*20);
-          else{{ctx.fillStyle="#FDE047";ctx.font="bold 16px monospace";ctx.fillText("+1 🍖 Lecker!",385,56-(pr-.6)*32);}}
+          const r=Math.max(0,evT-el),pr=1-r/2.1;bg(tk,false);dragon(310,156,tk,"stand",false,pr>.3&&pr<.85,false);
+          if(pr<.6)steak(550-pr*245,68+Math.sin(pr*Math.PI)*-30+pr*20);
+          else{{ctx.fillStyle="#FDE047";ctx.font="bold 16px monospace";ctx.fillText("+1 🍖 Lecker!",385,54-(pr-.6)*32);}}
           if(r<=0)evT=0;requestAnimationFrame(loop);return;
         }}
         if(D.event==="burn_tree"&&evT>0){{
           const r=Math.max(0,evT-el),pr=1-r/2.1,bl=pr>=.15&&pr<=.72;
           ctx.save();if(bl)ctx.translate(Math.sin(tk*1.9)*3,0);bg(tk,true);
-          tree(540,162,pr<.25?0:(pr<.78?1:2),tk);dragon(270,162,tk,"stand",bl,bl,true);
-          if(bl)fire(368,82,560,92,tk);
-          ctx.fillStyle="#FCA5A5";ctx.font="bold 15px monospace";ctx.fillText("🔥 Vor Wut einen Baum abgefackelt!",230,32);
+          tree(540,156,pr<.25?0:(pr<.78?1:2),tk);dragon(270,156,tk,"stand",bl,bl,true);
+          if(bl)fire(368,78,560,88,tk);
+          ctx.fillStyle="#FCA5A5";ctx.font="bold 15px monospace";ctx.fillText("🔥 Vor Wut einen Baum abgefackelt!",230,30);
           ctx.restore();if(r<=0)evT=0;requestAnimationFrame(loop);return;
         }}
         bg(tk,false);
-        if(mode==="sleep")dragon(345,162,tk,"sleep",false,false,false);
+        if(mode==="sleep")dragon(345,156,tk,"sleep",false,false,false);
         else if(mode==="fly"){{
-          const fx=365+Math.sin(el*1.1)*185,fy=102+Math.cos(el*2.2)*12;
-          ctx.fillStyle="rgba(2,132,199,.25)";ctx.fillRect(fx-42,165,84,6);dragon(fx,fy,tk,"fly",false,false,false);
+          const fx=365+Math.sin(el*1.1)*185,fy=98+Math.cos(el*2.2)*12;
+          ctx.fillStyle="rgba(2,132,199,.25)";ctx.fillRect(fx-42,159,84,6);dragon(fx,fy,tk,"fly",false,false,false);
         }}else{{
           const cy=(el*1.35)%2,st=cy>.55&&cy<.95,lx=cy<.7?cy*66:(1.4-cy)*44;
-          boulder(515,108,st?Math.sin(tk*1.8)*5:0,st);dragon(325+Math.max(0,lx),162,tk,"fight",st,st,false);
+          boulder(515,102,st?Math.sin(tk*1.8)*5:0,st);dragon(325+Math.max(0,lx),156,tk,"fight",st,st,false);
         }}
         requestAnimationFrame(loop);
       }}requestAnimationFrame(loop);
     </script></body></html>"""
-    components.html(html_stage, height=270, scrolling=False)
+    components.html(html_stage, height=262, scrolling=False)
 
 def svg_uri(s): return "data:image/svg+xml," + urllib.parse.quote(s.strip(), safe="")
 def get_cursor(lvl, sel):
@@ -166,11 +166,15 @@ def topic_bar_html(o):
 
 st.markdown("""<style>
 .stApp{background:radial-gradient(circle at 50% -10%,#0F1A2E 0%,#07090E 55%,#05070B 100%);color:#F1F5F9}
-.block-container{max-width:1180px!important;padding:2.1rem 2.3rem 3.2rem!important}
+/* Großzügiger Abstand nach oben (gedankliche Enter-Taste), damit nichts von der Streamlit-Leiste abgeschnitten wird */
+.block-container{max-width:1180px!important;padding-top:3.8rem!important;padding-bottom:3.4rem!important;padding-left:2.4rem!important;padding-right:2.4rem!important}
 hr{border:none!important;border-top:1px solid rgba(125,211,252,.22)!important;margin:1.25rem 0!important}
-.omni-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:.8rem;margin-bottom:1rem}
-.omni-brand{font-size:2.2rem;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#FFF 0%,#E0F2FE 55%,#7DD3FC 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
-.omni-tagline{font-size:.86rem;color:#94A3B8;margin-top:.2rem}
+.omni-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:.85rem;margin-bottom:1.1rem;margin-top:.35rem}
+.omni-brand{font-size:2.3rem;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#FFF 0%,#E0F2FE 55%,#7DD3FC 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.15}
+.omni-tagline{font-size:.88rem;color:#94A3B8;margin-top:.22rem}
+.study-topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.65rem;background:linear-gradient(165deg,#11192B,#0A0F1A);border:1px solid rgba(125,211,252,.28);border-radius:14px;padding:.7rem 1.15rem;margin-bottom:.85rem;box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.study-title{font-size:1.05rem;font-weight:700;color:#F8FAFC}
+.study-pills{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .ar-subtitle{font-size:1.18rem;font-weight:600;color:#E0F2FE;margin:.6rem 0 .7rem}
 .section-kicker{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7DD3FC;margin-bottom:.5rem}
 .sculpt-panel{background:linear-gradient(165deg,#11192B,#0A0F1A);border:1px solid rgba(125,211,252,.26);border-radius:16px;padding:1.15rem 1.35rem;box-shadow:0 14px 30px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.09);height:100%}
@@ -445,7 +449,6 @@ def process_rating_instant(card, rated, ef, iv, reps, lapses, next_rev, new_sc, 
         st.session_state.dragon_event = "burn_tree"
         ev.append("🔥 Dein Drache fackelt vor Wut einen Baum ab!")
 
-    # Streak steigt NUR bei "Gut" (3) oder "Leicht" (4). Bei "Schwer" (2) bleibt sie stehen, bei "Nochmal" (1) reißt sie.
     if rated == 1:
         a_str = 0
         ev.append("Antwort-Serie gerissen · Karte kommt gleich nochmal")
@@ -671,131 +674,52 @@ def delete_card(cid):
     except Exception: brk = True; raise
     finally: put_conn(c, brk)
 
-for k, v in [("study_queue", []), ("study_show_answer", False), ("study_done_count", 0), ("study_initial_total", 0), ("last_xp_event", None), ("session_notice", None), ("dragon_event", "none"), ("dragon_anim_seq", 0)]:
+for k, v in [("in_study_mode", False), ("study_queue", []), ("study_show_answer", False), ("study_done_count", 0), ("study_initial_total", 0), ("study_session_title", ""), ("last_xp_event", None), ("session_notice", None), ("dragon_event", "none"), ("dragon_anim_seq", 0)]:
     st.session_state.setdefault(k, v)
 st.session_state.setdefault("dragon_activity", random.choice(["sleep", "fly", "fight_rock"]))
 
-# --- Header & Maus-Auswahl ---
-cb, cc = st.columns([4.5, 1.5])
-with cb:
-    st.markdown('<div class="omni-header"><div><div class="omni-brand">OmniLearn</div><div class="omni-tagline">Active Recall & Spaced Repetition</div></div></div>', unsafe_allow_html=True)
-with cc:
-    st.markdown('<div style="height:.35rem"></div>', unsafe_allow_html=True)
-    with st.popover(f"🖱️ Maus: {active_cur['short']}", use_container_width=True):
-        st.markdown("**Freigeschaltete Maus-Symbole**")
-        for it in CURSOR_MILESTONES:
-            ok = cur_lvl >= it["level"]
-            ico = f'<img src="{svg_uri(it["svg"])}" width="18" height="18" style="vertical-align:middle;margin-right:6px"/>' if it["svg"] else "↖️ "
-            st_txt = "Freigeschaltet" if ok else f"Ab Level {it['level']}"
-            st.markdown(f'{ico}<b>{it["name"]}</b> — <span style="color:#94A3B8;font-size:.82rem">{st_txt}</span>', unsafe_allow_html=True)
-            if ok:
-                act = active_cur["level"] == it["level"]
-                if st.button("✓ Aktiv" if act else "Auswählen", key=f"cs_{it['level']}", disabled=act, use_container_width=True):
-                    user_prog["selected_cursor_level"] = it["level"]
-                    enqueue_writes([("UPDATE user_progress SET selected_cursor_level=%s WHERE id=1;", (it["level"],))])
-                    st.rerun()
-
-# --- Level & Tagesquest ---
-xp_l, xp_z = int(user_prog.get("xp_in_level") or 0), xp_next(cur_lvl)
-lvl_pct = min(100, round(xp_l / max(1, xp_z) * 100))
-a_str = int(user_prog.get("answer_streak") or 0)
-now_utc = datetime.datetime.now(datetime.timezone.utc)
-b10, b20 = user_prog.get("bonus_10_start"), user_prog.get("bonus_20_start")
-
-if b20 and (now_utc - b20).total_seconds() < 1800:
-    st_chip = f'<span class="streak-chip-hot">⚡ {a_str}er-Serie (+2 XP / {int(30-(now_utc-b20).total_seconds()//60)} Min)</span>'
-elif b10 and (now_utc - b10).total_seconds() < 1800:
-    st_chip = f'<span class="streak-chip-hot">⚡ {a_str}er-Serie (+1 XP / {int(30-(now_utc-b10).total_seconds()//60)} Min)</span>'
-else:
-    st_chip = f'<span class="streak-chip">Serie: {a_str} Gut/Leicht in Folge</span>'
-
-nxt_cur = next((c for c in CURSOR_MILESTONES if c["level"] > cur_lvl), None)
-cur_hint = f"Nächstes Maus-Symbol ab Lv. {nxt_cur['level']}: {nxt_cur['name']}" if nxt_cur else "Alle Maus-Symbole freigeschaltet"
-
-d_done, d_clm, q_str = int(user_prog.get("daily_cards_done") or 0), bool(user_prog.get("daily_quest_claimed")), int(user_prog.get("daily_quest_streak") or 0)
-d_pct = min(100, round(d_done / DAILY_GOAL_TARGET * 100))
-cyc = q_str % 7 if (q_str % 7 != 0 or q_str == 0) else 7
-dots = "".join(f'<span class="day-dot {"day-dot-active" if i < cyc else ""}"></span>' for i in range(7))
-q_txt = f"Tagesziel erfüllt (+{DAILY_GOAL_BONUS_XP} XP)" if d_clm else f"Noch {max(0, DAILY_GOAL_TARGET - d_done)} Karten bis +{DAILY_GOAL_BONUS_XP} XP"
-
-cl, cq = st.columns(2)
-with cl:
-    st.markdown(f'<div class="sculpt-panel"><div class="panel-top-row"><span class="level-pill">Level {cur_lvl}</span><span class="xp-meta">{xp_l} / {xp_z} XP</span></div><div class="progress-track"><div class="progress-fill-ice" style="width:{lvl_pct}%"></div></div><div class="panel-footer-row">{st_chip}<span>{cur_hint}</span></div></div>', unsafe_allow_html=True)
-with cq:
-    st.markdown(f'<div class="sculpt-panel"><div class="panel-top-row"><span style="font-weight:700;color:#F8FAFC">Tagesziel: {min(d_done, DAILY_GOAL_TARGET)} / {DAILY_GOAL_TARGET} Karten</span><span class="xp-meta">{q_txt}</span></div><div class="progress-track"><div class="progress-fill-quest" style="width:{d_pct}%"></div></div><div class="panel-footer-row"><span>7-Tage-Quest (Volles Level-Up): <b>{q_str}</b> Tage</span><span class="day-dots">{dots}</span></div></div>', unsafe_allow_html=True)
-
-st.markdown('<div style="height:.85rem"></div>', unsafe_allow_html=True)
-
+# Globale Werte für beide Ansichten berechnen
 folders = get_folders()
 tot_cards = sum(int(o.get("total_cards") or 0) for o in folders)
 tot_due = sum(int(o.get("due_cards") or 0) for o in folders)
 tot_meat = int(user_prog.get("dragon_meat") or 0)
+a_str = int(user_prog.get("answer_streak") or 0)
+now_utc = datetime.datetime.now(datetime.timezone.utc)
+b10, b20 = user_prog.get("bonus_10_start"), user_prog.get("bonus_20_start")
 
-s1, s2, s3, s4 = st.columns(4)
-s1.markdown(f'<div class="stat-card"><div class="stat-num">{tot_due}</div><div class="stat-label">Heute fällig</div></div>', unsafe_allow_html=True)
-s2.markdown(f'<div class="stat-card"><div class="stat-num">🍖 {tot_meat}</div><div class="stat-label">Drachen-Fleisch</div></div>', unsafe_allow_html=True)
-s3.markdown(f'<div class="stat-card"><div class="stat-num">{tot_cards}</div><div class="stat-label">Karten gesamt</div></div>', unsafe_allow_html=True)
-s4.markdown(f'<div class="stat-card"><div class="stat-num">{len(folders)}</div><div class="stat-label">Themen-Ordner</div></div>', unsafe_allow_html=True)
+# ==============================================================================
+# ANSICHT A: SEPARATE LERNSEITE (FOKUSSIERTES LERNEN)
+# ==============================================================================
+if st.session_state.in_study_mode:
+    col_back, col_info = st.columns([1.3, 4.7])
+    with col_back:
+        if st.button("← Zurück zur Übersicht", use_container_width=True):
+            st.session_state.update({
+                "in_study_mode": False,
+                "study_queue": [],
+                "study_show_answer": False,
+                "session_notice": None,
+                "dragon_event": "none",
+            })
+            st.rerun()
+    with col_info:
+        st.markdown(
+            f'<div class="study-topbar">'
+            f'<div class="study-title">🎯 {html.escape(st.session_state.study_session_title)}</div>'
+            f'<div class="study-pills">'
+            f'<span class="level-pill">Level {cur_lvl}</span>'
+            f'<span class="streak-chip">Serie: {a_str} Gut/Leicht</span>'
+            f'</div></div>',
+            unsafe_allow_html=True,
+        )
 
-if folders:
-    st.markdown('<div style="height:.95rem"></div><div class="section-kicker">Themen-Fortschritt (Anki-Status)</div>', unsafe_allow_html=True)
-    for i in range(0, len(folders), 2):
-        tc = st.columns(2)
-        tc[0].markdown(topic_bar_html(folders[i]), unsafe_allow_html=True)
-        if i + 1 < len(folders): tc[1].markdown(topic_bar_html(folders[i + 1]), unsafe_allow_html=True)
-
-st.markdown('<div style="height:.9rem"></div>', unsafe_allow_html=True)
-t_learn, t_up, t_mgr = st.tabs(["🎯 Lernen (Spaced Repetition)", "📄 Dokumente & Kartengenerator", "📁 Ordner & Kartenverwaltung"])
-
-with t_learn:
     render_dragon_stage(tot_meat, st.session_state.dragon_event, st.session_state.dragon_activity, st.session_state.dragon_anim_seq)
+
     if st.session_state.last_xp_event:
         st.markdown(f'<div class="xp-banner">{html.escape(st.session_state.last_xp_event)}</div>', unsafe_allow_html=True)
     if st.session_state.session_notice:
         st.info(st.session_state.session_notice)
 
-    cf, cm, cb_start = st.columns([2.2, 2.2, 1.4])
-    f_opts = {f"Alle Ordner ({tot_cards} Karten · {tot_due} fällig)": None}
-    for o in folders:
-        f_opts[f"{o['name']} ({o['total_cards']} Karten · {o['due_cards']} fällig)"] = o["id"]
-    sel_f = cf.selectbox("Lernbereich wählen", list(f_opts.keys()))
-
-    m_opts = {
-        "Fällige Karten (Spaced Repetition)": "due",
-        "Freies Lernen (alle Karten im Ordner)": "all",
-        "Nur bisher falsche Karten (Fehler-Training)": "weak",
-    }
-    sel_m = cm.selectbox("Lernmodus", list(m_opts.keys()))
-    with cb_start:
-        st.markdown('<div style="height:1.72rem"></div>', unsafe_allow_html=True)
-        if st.button("▶ Sitzung starten", use_container_width=True):
-            get_folders(force=True)
-            chosen_fid = f_opts[sel_f]
-            chosen_mode = m_opts[sel_m]
-            ks = load_cards(chosen_fid, chosen_mode)
-            notice = None
-            if not ks and chosen_mode == "due":
-                ks = load_cards(chosen_fid, "all")
-                if ks:
-                    notice = f"Aktuell sind keine Karten fällig – freie Übungsrunde mit allen {len(ks)} Karten gestartet!"
-            elif not ks and chosen_mode == "weak":
-                notice = "In diesem Bereich gibt es aktuell keine falsch beantworteten Karten. Wähle 'Freies Lernen', um alle Karten durchzugehen."
-            elif not ks:
-                notice = "In diesem Ordner sind noch keine Karteikarten vorhanden."
-
-            st.session_state.update({
-                "study_queue": list(ks),
-                "study_show_answer": False,
-                "study_done_count": 0,
-                "study_initial_total": len(ks),
-                "last_xp_event": None,
-                "session_notice": notice,
-                "dragon_event": "none",
-                "dragon_activity": random.choice(["sleep", "fly", "fight_rock"]),
-            })
-            st.rerun()
-
-    st.markdown("---")
     if st.session_state.study_queue:
         card = st.session_state.study_queue[0]
         rest, done = len(st.session_state.study_queue), st.session_state.study_done_count
@@ -849,69 +773,187 @@ with t_learn:
                 st.session_state.study_show_answer = False
                 st.rerun()
     else:
-        if st.session_state.study_initial_total > 0 and st.session_state.study_done_count > 0:
-            st.success(f"Stark! Alle {st.session_state.study_done_count} Karten dieser Sitzung abgeschlossen.")
-        elif tot_cards == 0:
-            st.info("Erstelle unter **Dokumente & Kartengenerator** deinen ersten Ordner und lade ein Skript hoch.")
-        else:
-            st.info("Wähle oben deinen Ordner und klicke auf **▶ Sitzung starten** (auch nicht-fällige Ordner starten direkt als freie Übungsrunde).")
+        st.success(f"Stark! Alle {st.session_state.study_done_count} Karten dieser Sitzung abgeschlossen.")
+        if st.button("← Zurück zur Übersicht", use_container_width=True, key="done_back_btn"):
+            st.session_state.update({
+                "in_study_mode": False,
+                "study_queue": [],
+                "study_show_answer": False,
+                "session_notice": None,
+                "dragon_event": "none",
+            })
+            st.rerun()
 
-with t_up:
-    st.markdown('<div class="ar-subtitle">1. Zielordner auswählen oder neu anlegen</div>', unsafe_allow_html=True)
-    cn1, cn2 = st.columns([3.5, 1])
-    new_fn = cn1.text_input("Ordner", label_visibility="collapsed", placeholder="Neuen Ordnernamen eingeben (z. B. Makroökonomie, BGB AT)...")
-    if cn2.button("➕ Ordner erstellen", use_container_width=True):
-        if new_fn.strip():
-            if create_folder(new_fn): st.success(f"Ordner **{new_fn.strip()}** erstellt!"); st.rerun()
-            else: st.warning("Dieser Ordner existiert bereits.")
-    folders = get_folders()
-    if folders:
-        fmap = {o["name"]: o["id"] for o in folders}
-        z_name = st.selectbox("Zielordner", list(fmap.keys()))
-        st.markdown('<div class="ar-subtitle">2. Dokumente hochladen & Lernkarten erstellen</div>', unsafe_allow_html=True)
-        ups = st.file_uploader("Dokumente (PDF, DOCX, TXT, MD)", type=["pdf", "docx", "txt", "md"], accept_multiple_files=True)
-        co1, co2 = st.columns([1, 2])
-        k_cnt = co1.slider("Karten pro Dokument", 4, 24, 8)
-        k_typs = co2.multiselect("Aufgaben-Mix", ["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"], default=["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"])
-        if st.button("⚡ Abwechslungsreiche Lernkarten generieren", use_container_width=True):
-            if ups and k_typs:
-                tot_new = 0
-                for f in ups:
-                    with st.spinner(f"Erstelle Karten aus '{f.name}'..."):
-                        try:
-                            tx = extract_text(f)
-                            if len(tx) < 40: st.warning(f"Kaum Text in '{f.name}'."); continue
-                            nc = generate_cards(tx, k_cnt, k_typs)
-                            save_doc_and_cards(fmap[z_name], f.name, len(tx), nc, tx)
-                            tot_new += len(nc)
-                        except Exception as e: st.error(f"Fehler bei '{f.name}': {e}")
-                if tot_new > 0: st.success(f"{tot_new} Karten in **{z_name}** gespeichert!"); st.rerun()
+# ==============================================================================
+# ANSICHT B: HAUPT-DASHBOARD & VERWALTUNG
+# ==============================================================================
+else:
+    cb, cc = st.columns([4.5, 1.5])
+    with cb:
+        st.markdown('<div class="omni-header"><div><div class="omni-brand">OmniLearn</div><div class="omni-tagline">Active Recall & Spaced Repetition</div></div></div>', unsafe_allow_html=True)
+    with cc:
+        st.markdown('<div style="height:.55rem"></div>', unsafe_allow_html=True)
+        with st.popover(f"🖱️ Maus: {active_cur['short']}", use_container_width=True):
+            st.markdown("**Freigeschaltete Maus-Symbole**")
+            for it in CURSOR_MILESTONES:
+                ok = cur_lvl >= it["level"]
+                ico = f'<img src="{svg_uri(it["svg"])}" width="18" height="18" style="vertical-align:middle;margin-right:6px"/>' if it["svg"] else "↖️ "
+                st_txt = "Freigeschaltet" if ok else f"Ab Level {it['level']}"
+                st.markdown(f'{ico}<b>{it["name"]}</b> — <span style="color:#94A3B8;font-size:.82rem">{st_txt}</span>', unsafe_allow_html=True)
+                if ok:
+                    act = active_cur["level"] == it["level"]
+                    if st.button("✓ Aktiv" if act else "Auswählen", key=f"cs_{it['level']}", disabled=act, use_container_width=True):
+                        user_prog["selected_cursor_level"] = it["level"]
+                        enqueue_writes([("UPDATE user_progress SET selected_cursor_level=%s WHERE id=1;", (it["level"],))])
+                        st.rerun()
 
-with t_mgr:
-    if not folders:
-        st.info("Noch keine Ordner vorhanden.")
+    xp_l, xp_z = int(user_prog.get("xp_in_level") or 0), xp_next(cur_lvl)
+    lvl_pct = min(100, round(xp_l / max(1, xp_z) * 100))
+
+    if b20 and (now_utc - b20).total_seconds() < 1800:
+        st_chip = f'<span class="streak-chip-hot">⚡ {a_str}er-Serie (+2 XP / {int(30-(now_utc-b20).total_seconds()//60)} Min)</span>'
+    elif b10 and (now_utc - b10).total_seconds() < 1800:
+        st_chip = f'<span class="streak-chip-hot">⚡ {a_str}er-Serie (+1 XP / {int(30-(now_utc-b10).total_seconds()//60)} Min)</span>'
     else:
-        vmap = {f"{o['name']} ({o['total_cards']} Karten · {o['doc_count']} Dokumente)": o for o in folders}
-        cur_o = vmap[st.selectbox("Ordner inspizieren", list(vmap.keys()))]
-        st.markdown(topic_bar_html(cur_o), unsafe_allow_html=True)
-        st.markdown('<div class="ar-subtitle">Dokumente</div>', unsafe_allow_html=True)
-        for d in load_docs(cur_o["id"]):
-            st.markdown(f"- **{d['filename']}** ({d['card_count']} Karten · {d['uploaded_at'].astimezone(BERLIN_TZ).strftime('%d.%m.%Y %H:%M')})")
-        st.markdown("---")
-        st.markdown('<div class="ar-subtitle">Karteikarten & Anki-Status</div>', unsafe_allow_html=True)
-        flt = st.radio("Filter:", ["Alle", "🔵 Gut gelernt", "🟡 Wackelig", "🔴 Kritisch", "⚫ Ungelernt"], horizontal=True)
-        f_key = {"🔵 Gut gelernt": "gut", "🟡 Wackelig": "wackelig", "🔴 Kritisch": "kritisch", "⚫ Ungelernt": "neu"}
-        b_lbl = {"gut": "🔵 Gut", "wackelig": "🟡 Wackelig", "kritisch": "🔴 Kritisch", "neu": "⚫ Neu"}
-        now_u = datetime.datetime.now(datetime.timezone.utc)
-        for k in load_cards(cur_o["id"], "all"):
-            kat = anki_cat(k)
-            if flt != "Alle" and kat != f_key[flt]: continue
-            st_t = "Jetzt fällig" if k["next_review"] <= now_u else f"Fällig {k['next_review'].astimezone(BERLIN_TZ).strftime('%d.%m.%Y')}"
-            with st.expander(f"{b_lbl[kat]} · [{k['card_type']}] {k['question'][:78]} ({st_t})"):
-                st.markdown(f"**Frage:** {k['question']}\n\n**Antwort:** {k['answer']}")
-                if k.get("explanation"): st.caption(f"Erklärung: {k['explanation']}")
-                if st.button("Karte löschen", key=f"dk_{k['id']}"): delete_card(k["id"]); st.rerun()
-        st.markdown("---")
-        with st.expander("Gefahrenzone: Ordner löschen"):
-            if st.button(f"Ordner '{cur_o['name']}' endgültig löschen", key=f"df_{cur_o['id']}"):
-                delete_folder(cur_o["id"]); st.rerun()
+        st_chip = f'<span class="streak-chip">Serie: {a_str} Gut/Leicht in Folge</span>'
+
+    nxt_cur = next((c for c in CURSOR_MILESTONES if c["level"] > cur_lvl), None)
+    cur_hint = f"Nächstes Maus-Symbol ab Lv. {nxt_cur['level']}: {nxt_cur['name']}" if nxt_cur else "Alle Maus-Symbole freigeschaltet"
+
+    d_done, d_clm, q_str = int(user_prog.get("daily_cards_done") or 0), bool(user_prog.get("daily_quest_claimed")), int(user_prog.get("daily_quest_streak") or 0)
+    d_pct = min(100, round(d_done / DAILY_GOAL_TARGET * 100))
+    cyc = q_str % 7 if (q_str % 7 != 0 or q_str == 0) else 7
+    dots = "".join(f'<span class="day-dot {"day-dot-active" if i < cyc else ""}"></span>' for i in range(7))
+    q_txt = f"Tagesziel erfüllt (+{DAILY_GOAL_BONUS_XP} XP)" if d_clm else f"Noch {max(0, DAILY_GOAL_TARGET - d_done)} Karten bis +{DAILY_GOAL_BONUS_XP} XP"
+
+    cl, cq = st.columns(2)
+    with cl:
+        st.markdown(f'<div class="sculpt-panel"><div class="panel-top-row"><span class="level-pill">Level {cur_lvl}</span><span class="xp-meta">{xp_l} / {xp_z} XP</span></div><div class="progress-track"><div class="progress-fill-ice" style="width:{lvl_pct}%"></div></div><div class="panel-footer-row">{st_chip}<span>{cur_hint}</span></div></div>', unsafe_allow_html=True)
+    with cq:
+        st.markdown(f'<div class="sculpt-panel"><div class="panel-top-row"><span style="font-weight:700;color:#F8FAFC">Tagesziel: {min(d_done, DAILY_GOAL_TARGET)} / {DAILY_GOAL_TARGET} Karten</span><span class="xp-meta">{q_txt}</span></div><div class="progress-track"><div class="progress-fill-quest" style="width:{d_pct}%"></div></div><div class="panel-footer-row"><span>7-Tage-Quest (Volles Level-Up): <b>{q_str}</b> Tage</span><span class="day-dots">{dots}</span></div></div>', unsafe_allow_html=True)
+
+    st.markdown('<div style="height:.85rem"></div>', unsafe_allow_html=True)
+
+    s1, s2, s3, s4 = st.columns(4)
+    s1.markdown(f'<div class="stat-card"><div class="stat-num">{tot_due}</div><div class="stat-label">Heute fällig</div></div>', unsafe_allow_html=True)
+    s2.markdown(f'<div class="stat-card"><div class="stat-num">🍖 {tot_meat}</div><div class="stat-label">Drachen-Fleisch</div></div>', unsafe_allow_html=True)
+    s3.markdown(f'<div class="stat-card"><div class="stat-num">{tot_cards}</div><div class="stat-label">Karten gesamt</div></div>', unsafe_allow_html=True)
+    s4.markdown(f'<div class="stat-card"><div class="stat-num">{len(folders)}</div><div class="stat-label">Themen-Ordner</div></div>', unsafe_allow_html=True)
+
+    if folders:
+        st.markdown('<div style="height:.95rem"></div><div class="section-kicker">Themen-Fortschritt (Anki-Status)</div>', unsafe_allow_html=True)
+        for i in range(0, len(folders), 2):
+            tc = st.columns(2)
+            tc[0].markdown(topic_bar_html(folders[i]), unsafe_allow_html=True)
+            if i + 1 < len(folders): tc[1].markdown(topic_bar_html(folders[i + 1]), unsafe_allow_html=True)
+
+    st.markdown('<div style="height:.9rem"></div>', unsafe_allow_html=True)
+    t_learn, t_up, t_mgr = st.tabs(["🎯 Lernen (Spaced Repetition)", "📄 Dokumente & Kartengenerator", "📁 Ordner & Kartenverwaltung"])
+
+    with t_learn:
+        render_dragon_stage(tot_meat, "none", st.session_state.dragon_activity, st.session_state.dragon_anim_seq)
+
+        cf, cm, cb_start = st.columns([2.2, 2.2, 1.4])
+        f_opts = {f"Alle Ordner ({tot_cards} Karten · {tot_due} fällig)": None}
+        for o in folders:
+            f_opts[f"{o['name']} ({o['total_cards']} Karten · {o['due_cards']} fällig)"] = o["id"]
+        sel_f = cf.selectbox("Lernbereich wählen", list(f_opts.keys()))
+
+        m_opts = {
+            "Fällige Karten (Spaced Repetition)": "due",
+            "Freies Lernen (alle Karten im Ordner)": "all",
+            "Nur bisher falsche Karten (Fehler-Training)": "weak",
+        }
+        sel_m = cm.selectbox("Lernmodus", list(m_opts.keys()))
+        with cb_start:
+            st.markdown('<div style="height:1.72rem"></div>', unsafe_allow_html=True)
+            if st.button("▶ Sitzung starten", use_container_width=True):
+                get_folders(force=True)
+                chosen_fid = f_opts[sel_f]
+                chosen_mode = m_opts[sel_m]
+                ks = load_cards(chosen_fid, chosen_mode)
+                notice = None
+                if not ks and chosen_mode == "due":
+                    ks = load_cards(chosen_fid, "all")
+                    if ks:
+                        notice = f"Aktuell sind keine Karten fällig – freie Übungsrunde mit allen {len(ks)} Karten gestartet!"
+
+                if ks:
+                    st.session_state.update({
+                        "in_study_mode": True,
+                        "study_queue": list(ks),
+                        "study_show_answer": False,
+                        "study_done_count": 0,
+                        "study_initial_total": len(ks),
+                        "study_session_title": sel_f.split(" (")[0],
+                        "last_xp_event": None,
+                        "session_notice": notice,
+                        "dragon_event": "none",
+                        "dragon_activity": random.choice(["sleep", "fly", "fight_rock"]),
+                    })
+                    st.rerun()
+                else:
+                    if chosen_mode == "weak":
+                        st.warning("In diesem Bereich gibt es aktuell keine falsch beantworteten Karten.")
+                    else:
+                        st.warning("In diesem Ordner sind noch keine Karteikarten vorhanden.")
+
+    with t_up:
+        st.markdown('<div class="ar-subtitle">1. Zielordner auswählen oder neu anlegen</div>', unsafe_allow_html=True)
+        cn1, cn2 = st.columns([3.5, 1])
+        new_fn = cn1.text_input("Ordner", label_visibility="collapsed", placeholder="Neuen Ordnernamen eingeben (z. B. Makroökonomie, BGB AT)...")
+        if cn2.button("➕ Ordner erstellen", use_container_width=True):
+            if new_fn.strip():
+                if create_folder(new_fn): st.success(f"Ordner **{new_fn.strip()}** erstellt!"); st.rerun()
+                else: st.warning("Dieser Ordner existiert bereits.")
+        folders = get_folders()
+        if folders:
+            fmap = {o["name"]: o["id"] for o in folders}
+            z_name = st.selectbox("Zielordner", list(fmap.keys()))
+            st.markdown('<div class="ar-subtitle">2. Dokumente hochladen & Lernkarten erstellen</div>', unsafe_allow_html=True)
+            ups = st.file_uploader("Dokumente (PDF, DOCX, TXT, MD)", type=["pdf", "docx", "txt", "md"], accept_multiple_files=True)
+            co1, co2 = st.columns([1, 2])
+            k_cnt = co1.slider("Karten pro Dokument", 4, 24, 8)
+            k_typs = co2.multiselect("Aufgaben-Mix", ["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"], default=["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"])
+            if st.button("⚡ Abwechslungsreiche Lernkarten generieren", use_container_width=True):
+                if ups and k_typs:
+                    tot_new = 0
+                    for f in ups:
+                        with st.spinner(f"Erstelle Karten aus '{f.name}'..."):
+                            try:
+                                tx = extract_text(f)
+                                if len(tx) < 40: st.warning(f"Kaum Text in '{f.name}'."); continue
+                                nc = generate_cards(tx, k_cnt, k_typs)
+                                save_doc_and_cards(fmap[z_name], f.name, len(tx), nc, tx)
+                                tot_new += len(nc)
+                            except Exception as e: st.error(f"Fehler bei '{f.name}': {e}")
+                    if tot_new > 0: st.success(f"{tot_new} Karten in **{z_name}** gespeichert!"); st.rerun()
+
+    with t_mgr:
+        if not folders:
+            st.info("Noch keine Ordner vorhanden.")
+        else:
+            vmap = {f"{o['name']} ({o['total_cards']} Karten · {o['doc_count']} Dokumente)": o for o in folders}
+            cur_o = vmap[st.selectbox("Ordner inspizieren", list(vmap.keys()))]
+            st.markdown(topic_bar_html(cur_o), unsafe_allow_html=True)
+            st.markdown('<div class="ar-subtitle">Dokumente</div>', unsafe_allow_html=True)
+            for d in load_docs(cur_o["id"]):
+                st.markdown(f"- **{d['filename']}** ({d['card_count']} Karten · {d['uploaded_at'].astimezone(BERLIN_TZ).strftime('%d.%m.%Y %H:%M')})")
+            st.markdown("---")
+            st.markdown('<div class="ar-subtitle">Karteikarten & Anki-Status</div>', unsafe_allow_html=True)
+            flt = st.radio("Filter:", ["Alle", "🔵 Gut gelernt", "🟡 Wackelig", "🔴 Kritisch", "⚫ Ungelernt"], horizontal=True)
+            f_key = {"🔵 Gut gelernt": "gut", "🟡 Wackelig": "wackelig", "🔴 Kritisch": "kritisch", "⚫ Ungelernt": "neu"}
+            b_lbl = {"gut": "🔵 Gut", "wackelig": "🟡 Wackelig", "kritisch": "🔴 Kritisch", "neu": "⚫ Neu"}
+            now_u = datetime.datetime.now(datetime.timezone.utc)
+            for k in load_cards(cur_o["id"], "all"):
+                kat = anki_cat(k)
+                if flt != "Alle" and kat != f_key[flt]: continue
+                st_t = "Jetzt fällig" if k["next_review"] <= now_u else f"Fällig {k['next_review'].astimezone(BERLIN_TZ).strftime('%d.%m.%Y')}"
+                with st.expander(f"{b_lbl[kat]} · [{k['card_type']}] {k['question'][:78]} ({st_t})"):
+                    st.markdown(f"**Frage:** {k['question']}\n\n**Antwort:** {k['answer']}")
+                    if k.get("explanation"): st.caption(f"Erklärung: {k['explanation']}")
+                    if st.button("Karte löschen", key=f"dk_{k['id']}"): delete_card(k["id"]); st.rerun()
+            st.markdown("---")
+            with st.expander("Gefahrenzone: Ordner löschen"):
+                if st.button(f"Ordner '{cur_o['name']}' endgültig löschen", key=f"df_{cur_o['id']}"):
+                    delete_folder(cur_o["id"]); st.rerun()
