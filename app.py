@@ -40,7 +40,7 @@ CURSOR_MILESTONES = [
         "short": "Litschi",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <ellipse cx="16" cy="17.5" rx="10.8" ry="11.5" fill="#E11D48" stroke="#07090E" stroke-width="2"/>
           <ellipse cx="16" cy="17.5" rx="8.2" ry="9" fill="none" stroke="#FB7185" stroke-width="1.2" stroke-dasharray="2 2"/>
           <circle cx="12.5" cy="13.5" r="1.2" fill="#FDA4AF"/><circle cx="19.5" cy="14" r="1.2" fill="#FDA4AF"/>
@@ -54,7 +54,7 @@ CURSOR_MILESTONES = [
         "short": "Panzer",
         "hot_x": 4,
         "hot_y": 14,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <rect x="2.5" y="12.5" width="11.5" height="3.6" rx="1.6" fill="#94A3B8" stroke="#07090E" stroke-width="1.5"/>
           <rect x="11" y="9.5" width="12.5" height="7.2" rx="2.5" fill="#4D7C0F" stroke="#07090E" stroke-width="1.6"/>
           <rect x="6" y="16" width="21.5" height="8.5" rx="4.2" fill="#365314" stroke="#07090E" stroke-width="1.8"/>
@@ -67,7 +67,7 @@ CURSOR_MILESTONES = [
         "short": "Goldbarren",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <polygon points="8,9.5 24,9.5 29.5,23.5 2.5,23.5" fill="#F59E0B" stroke="#07090E" stroke-width="1.8" stroke-linejoin="round"/>
           <polygon points="10,11.5 22,11.5 25.5,20.5 6.5,20.5" fill="#FDE047"/>
           <line x1="11" y1="13.8" x2="21" y2="13.8" stroke="#FEF9C3" stroke-width="1.8" stroke-linecap="round"/>
@@ -79,7 +79,7 @@ CURSOR_MILESTONES = [
         "short": "Blauer Schleim",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <path d="M16 3.5 C16 3.5, 28 14, 28 21.2 C28 26.8, 22.6 29.2, 16 29.2 C9.4 29.2, 4 26.8, 4 21.2 C4 14, 16 3.5, 16 3.5 Z" fill="#0EA5E9" stroke="#07090E" stroke-width="1.8"/>
           <ellipse cx="11" cy="15" rx="2.2" ry="3.5" transform="rotate(-25 11 15)" fill="#BAE6FD"/>
           <circle cx="12.5" cy="21" r="1.9" fill="#FFFFFF"/><circle cx="19.5" cy="21" r="1.9" fill="#FFFFFF"/>
@@ -93,7 +93,7 @@ CURSOR_MILESTONES = [
         "short": "Schneeflocke",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <g stroke="#07090E" stroke-width="3.8" stroke-linecap="round">
             <line x1="16" y1="3" x2="16" y2="29"/><line x1="4.7" y1="9.5" x2="27.3" y2="22.5"/><line x1="27.3" y1="9.5" x2="4.7" y2="22.5"/>
           </g>
@@ -110,7 +110,7 @@ CURSOR_MILESTONES = [
         "short": "Affenkopf",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <circle cx="6.2" cy="16" r="4.2" fill="#92400E" stroke="#07090E" stroke-width="1.6"/>
           <circle cx="25.8" cy="16" r="4.2" fill="#92400E" stroke="#07090E" stroke-width="1.6"/>
           <circle cx="16" cy="16" r="10.5" fill="#78350F" stroke="#07090E" stroke-width="1.8"/>
@@ -223,7 +223,7 @@ st.markdown(
 
     .block-container {
         max-width: 1180px !important;
-        padding-top: 2rem !important;
+        padding-top: 2.2rem !important;
         padding-bottom: 3.5rem !important;
         padding-left: 2.4rem !important;
         padding-right: 2.4rem !important;
@@ -543,26 +543,12 @@ st.markdown(
     .dot-kritisch { background: #F87171; }
     .dot-neu { background: #334155; border: 1px solid #64748B; }
 
-    /* Fokussierte Lern-Fortschrittsleiste oben */
-    .focus-progress-wrap {
-        margin-bottom: 0.35rem;
-    }
-    .focus-progress-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.84rem;
-        color: #94A3B8;
-        font-weight: 600;
-        margin-bottom: 0.35rem;
-    }
-
     .flashcard-box {
         background: linear-gradient(160deg, #11192C 0%, #0A0F1B 100%);
         border: 1.5px solid rgba(125, 211, 252, 0.48);
         border-radius: 18px;
-        padding: 2.15rem 2.15rem;
-        margin: 0.85rem 0 1.25rem 0;
+        padding: 2rem 2rem;
+        margin: 1rem 0 1.25rem 0;
         box-shadow:
             0 18px 38px rgba(0, 0, 0, 0.58),
             0 0 0 1px rgba(125, 211, 252, 0.08),
@@ -575,7 +561,7 @@ st.markdown(
         flex-wrap: wrap;
         align-items: center;
         gap: 0.5rem;
-        margin-bottom: 1.15rem;
+        margin-bottom: 1.1rem;
     }
 
     .flashcard-badge {
@@ -615,7 +601,7 @@ st.markdown(
     }
 
     .flashcard-question {
-        font-size: 1.38rem;
+        font-size: 1.32rem;
         font-weight: 500;
         color: #F8FAFC;
         line-height: 1.65;
@@ -632,7 +618,7 @@ st.markdown(
     }
 
     .flashcard-answer-body {
-        font-size: 1.18rem;
+        font-size: 1.15rem;
         font-weight: 400;
         color: #F8FAFC;
         line-height: 1.65;
@@ -681,15 +667,15 @@ st.markdown(
     }
 
     .xp-banner {
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.14) 0%, rgba(15, 23, 42, 0.88) 100%);
-        border: 1px solid rgba(125, 211, 252, 0.42);
-        border-radius: 11px;
-        padding: 0.55rem 0.95rem;
-        margin-bottom: 0.7rem;
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.16) 0%, rgba(15, 23, 42, 0.92) 100%);
+        border: 1px solid rgba(125, 211, 252, 0.5);
+        border-radius: 12px;
+        padding: 0.75rem 1.1rem;
+        margin-bottom: 1rem;
         color: #E0F2FE;
-        font-size: 0.88rem;
+        font-size: 0.94rem;
         font-weight: 600;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
     .stTabs [data-baseweb="tab-list"] {
@@ -1688,530 +1674,507 @@ if "study_label" not in st.session_state:
 if "last_xp_event" not in st.session_state:
     st.session_state.last_xp_event = None
 
-now_utc = datetime.datetime.now(datetime.timezone.utc)
+# ==============================================================================
+# KOPFBEREICH & LEVEL-/QUEST-ÜBERSICHT
+# ==============================================================================
+col_brand, col_cursor_btn = st.columns([4.5, 1.5])
+with col_brand:
+    st.markdown(
+        '<div class="omni-header" style="border-bottom:none;margin-bottom:0;padding-bottom:0;"><div><div class="omni-brand">OmniLearn</div><div class="omni-tagline">Active Recall & Spaced Repetition</div></div></div>',
+        unsafe_allow_html=True,
+    )
+
+with col_cursor_btn:
+    st.markdown('<div style="height:0.35rem;"></div>', unsafe_allow_html=True)
+    with st.popover(f"🖱️ Maus: {aktiver_cursor['short']}", use_container_width=True):
+        st.markdown("**Freigeschaltete Maus-Symbole**")
+        st.caption("Alle 5 Level schaltest du ein neues Symbol für deinen Mauszeiger frei.")
+        for item in CURSOR_MILESTONES:
+            freigeschaltet = aktuelles_level >= item["level"]
+            if item["svg"]:
+                uri = svg_zu_data_uri(item["svg"])
+                icon_html = f'<img src="{uri}" width="20" height="20" style="vertical-align:middle;margin-right:6px;"/>'
+            else:
+                icon_html = "↖️ "
+
+            status = "Freigeschaltet" if freigeschaltet else f"Ab Level {item['level']}"
+            label_row = f'{icon_html}<b>{item["name"]}</b> — <span style="color:#94A3B8;font-size:0.82rem;">{status}</span>'
+            st.markdown(label_row, unsafe_allow_html=True)
+
+            if freigeschaltet:
+                ist_aktiv = (aktiver_cursor["level"] == item["level"])
+                btn_txt = "✓ Aktiv" if ist_aktiv else "Auswählen"
+                if st.button(btn_txt, key=f"cur_sel_{item['level']}", disabled=ist_aktiv, use_container_width=True):
+                    setze_ausgewaehlten_cursor(item["level"])
+                    st.rerun()
+
+st.markdown('<hr style="margin-top:0.6rem;margin-bottom:1.1rem;">', unsafe_allow_html=True)
+
+# --- Level- & Tagesquest-Karten ---
+xp_im_lvl = int(user_prog["xp_in_level"])
+xp_ziel_lvl = xp_fuer_naechstes_level(aktuelles_level)
+lvl_prozent = min(100, round((xp_im_lvl / max(1, xp_ziel_lvl)) * 100))
 answer_streak = int(user_prog["answer_streak"])
+
+# Aktiver Multiplikator inkl. Restzeit
+now_utc = datetime.datetime.now(datetime.timezone.utc)
 b10_start = user_prog.get("bonus_10_start")
 b20_start = user_prog.get("bonus_20_start")
 
-# ==============================================================================
-# ANSICHT 1: FOKUS-LERNMODUS (WENN EINE SITZUNG LÄUFT -> NUR DIE FRAGE OBEN)
-# ==============================================================================
-if st.session_state.study_queue:
-    aktuelle_karte = st.session_state.study_queue[0]
-    rest = len(st.session_state.study_queue)
-    erledigt = st.session_state.study_done_count
-    gesamt_sitzung = max(1, erledigt + rest)
-    fortschritt_pct = min(100, round((erledigt / gesamt_sitzung) * 100))
+bonus_val = 0
+time_left = 0
 
-    col_prog, col_exit = st.columns([5.2, 1.1])
-    with col_prog:
-        st.markdown(
-            f'<div class="focus-progress-wrap">'
-            f'<div class="focus-progress-meta">'
-            f'<span>Fortschritt: {erledigt} abgeschlossen · {rest} verbleibend</span>'
-            f'<span>Level {aktuelles_level} · Serie {answer_streak}</span>'
-            f'</div>'
-            f'<div class="progress-track" style="margin:0;">'
-            f'<div class="progress-fill-ice" style="width:{fortschritt_pct}%;"></div>'
-            f'</div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
-    with col_exit:
-        if st.button("✕ Beenden", key="exit_study_mode", use_container_width=True):
-            st.session_state.study_queue = []
-            st.session_state.study_show_answer = False
-            st.rerun()
+if b20_start and (now_utc - b20_start).total_seconds() < 1800:
+    bonus_val = 2
+    time_left = int(30 - (now_utc - b20_start).total_seconds() // 60)
+elif b10_start and (now_utc - b10_start).total_seconds() < 1800:
+    bonus_val = 1
+    time_left = int(30 - (now_utc - b10_start).total_seconds() // 60)
 
-    if st.session_state.last_xp_event:
-        st.markdown(f'<div class="xp-banner">{html.escape(st.session_state.last_xp_event)}</div>', unsafe_allow_html=True)
+if bonus_val == 2:
+    streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Serie (+2 XP / {time_left} Min)</span>'
+elif bonus_val == 1:
+    streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Serie (+1 XP / {time_left} Min)</span>'
+else:
+    b10_used = b10_start is not None and (now_utc - b10_start).total_seconds() >= 1800
+    b20_used = b20_start is not None and (now_utc - b20_start).total_seconds() >= 1800
+    if answer_streak >= 20 and b20_used:
+        streak_html = f'<span class="streak-chip">Serie: {answer_streak} (Tages-Boosts verbraucht)</span>'
+    elif answer_streak >= 10 and b10_used and not b20_start:
+        streak_html = f'<span class="streak-chip">Serie: {answer_streak} (Boost 2 ab Serie 20)</span>'
+    else:
+        streak_html = f'<span class="streak-chip">Serie: {answer_streak} richtig in Folge</span>'
 
-    war_neu = (int(aktuelle_karte.get("success_count", 0)) == 0)
-    sim_streak = answer_streak + 1
-    aktueller_streak_bonus = 0
-    if sim_streak >= 10:
-        if b10_start is None or (now_utc - b10_start).total_seconds() < 1800:
-            aktueller_streak_bonus = 1
-    if sim_streak >= 20:
-        if b20_start is None or (now_utc - b20_start).total_seconds() < 1800:
-            aktueller_streak_bonus = 2
+naechster_cursor = next((c for c in CURSOR_MILESTONES if c["level"] > aktuelles_level), None)
+cursor_vorschau_txt = (
+    f"Nächstes Maus-Symbol ab Lv. {naechster_cursor['level']}: {naechster_cursor['name']}"
+    if naechster_cursor else "Alle Maus-Symbole freigeschaltet"
+)
 
-    moegliche_xp = (2 if war_neu else 1) + aktueller_streak_bonus
+daily_done = int(user_prog["daily_cards_done"])
+daily_pct = min(100, round((daily_done / DAILY_GOAL_TARGET) * 100))
+daily_claimed = bool(user_prog["daily_quest_claimed"])
+quest_streak = int(user_prog["daily_quest_streak"])
+tage_im_zyklus = quest_streak % 7 if (quest_streak % 7 != 0 or quest_streak == 0) else 7
 
-    anzeige_typ = "Problemstellung" if aktuelle_karte["card_type"] == "Transfer" else aktuelle_karte["card_type"]
-    folder_esc = html.escape(str(aktuelle_karte["folder_name"]))
-    typ_esc = html.escape(str(anzeige_typ))
+dots_html = "".join(
+    f'<span class="day-dot {"day-dot-active" if i < tage_im_zyklus else ""}"></span>'
+    for i in range(7)
+)
+quest_status_txt = (
+    f"Tagesziel erfüllt (+{DAILY_GOAL_BONUS_XP} XP erhalten)"
+    if daily_claimed else f"Noch {max(0, DAILY_GOAL_TARGET - daily_done)} Karten bis +{DAILY_GOAL_BONUS_XP} XP"
+)
 
-    badges_html = (
-        f'<span class="flashcard-badge">{folder_esc} · {typ_esc}</span>'
-        f'<span class="flashcard-badge-xp">+{moegliche_xp} XP bei Erfolg</span>'
-    )
-    if aktuelle_karte.get("lapses", 0) > 0:
-        badges_html += f'<span class="flashcard-badge-warn">Wiederholung ({aktuelle_karte["lapses"]}× falsch)</span>'
-
-    ist_lueckentext = (anzeige_typ == "Lückentext")
-    frage_html = formatiere_kartentext_html(aktuelle_karte["question"], ist_lueckentext=ist_lueckentext)
-
+col_lvl, col_quest = st.columns(2)
+with col_lvl:
     st.markdown(
-        f'<div class="flashcard-box">'
-        f'<div class="flashcard-meta">{badges_html}</div>'
-        f'<div class="flashcard-question">{frage_html}</div>'
+        f'<div class="sculpt-panel">'
+        f'<div class="panel-top-row"><span class="level-pill">Level {aktuelles_level}</span><span class="xp-meta">{xp_im_lvl} / {xp_ziel_lvl} XP</span></div>'
+        f'<div class="progress-track"><div class="progress-fill-ice" style="width:{lvl_prozent}%;"></div></div>'
+        f'<div class="panel-footer-row">{streak_html}<span>{cursor_vorschau_txt}</span></div>'
         f'</div>',
         unsafe_allow_html=True,
     )
 
-    mc_options = []
-    if aktuelle_karte["card_type"] == "Multiple Choice":
-        try:
-            mc_options = json.loads(aktuelle_karte.get("options_json") or "[]")
-        except Exception:
-            mc_options = []
+with col_quest:
+    st.markdown(
+        f'<div class="sculpt-panel">'
+        f'<div class="panel-top-row"><span style="font-weight:700;color:#F8FAFC;font-size:0.98rem;">Tagesziel: {min(daily_done, DAILY_GOAL_TARGET)} / {DAILY_GOAL_TARGET} Karten</span><span class="xp-meta">{quest_status_txt}</span></div>'
+        f'<div class="progress-track"><div class="progress-fill-quest" style="width:{daily_pct}%;"></div></div>'
+        f'<div class="panel-footer-row"><span>7-Tage-Quest (Volles Level-Up): <b>{quest_streak}</b> Tage</span><span class="day-dots">{dots_html}</span></div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 
-    gewaehlte_mc = None
-    if mc_options:
-        gewaehlte_mc = st.radio(
-            "Wähle eine der 4 Antwortoptionen:",
-            mc_options,
-            key=f"mc_radio_{aktuelle_karte['id']}_{erledigt}"
-        )
+st.markdown('<div style="height:0.95rem;"></div>', unsafe_allow_html=True)
 
-    if not st.session_state.study_show_answer:
-        if st.button("Antwort aufdecken", use_container_width=True):
-            st.session_state.study_show_answer = True
-            st.rerun()
-    else:
-        if mc_options and gewaehlte_mc is not None:
-            if gewaehlte_mc.strip().lower() == aktuelle_karte["answer"].strip().lower():
-                st.success("Richtig ausgewählt!")
-            else:
-                st.error(f"Deine Auswahl: **{gewaehlte_mc}** — das war leider nicht richtig.")
+# --- Status-Kacheln ---
+ordner_liste = hole_ordner_schnell()
+gesamt_karten = sum(o["total_cards"] for o in ordner_liste)
+gesamt_faellig = sum(o["due_cards"] for o in ordner_liste)
+gesamt_schwach = sum(o["kritisch_cards"] for o in ordner_liste)
 
-        antwort_html = formatiere_kartentext_html(aktuelle_karte["answer"], ist_lueckentext=False)
-        erklaerung = str(aktuelle_karte.get("explanation") or "").strip()
-        erklaerung_block = (
-            f'<div class="flashcard-explanation">💡 {formatiere_kartentext_html(erklaerung)}</div>'
-            if erklaerung else ""
-        )
+c1, c2, c3, c4 = st.columns(4)
+with c1:
+    st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_faellig}</div><div class="stat-label">Heute fällig</div></div>', unsafe_allow_html=True)
+with c2:
+    st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_schwach}</div><div class="stat-label">Kritisch / Öfter falsch</div></div>', unsafe_allow_html=True)
+with c3:
+    st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_karten}</div><div class="stat-label">Karten gesamt</div></div>', unsafe_allow_html=True)
+with c4:
+    st.markdown(f'<div class="stat-card"><div class="stat-num">{len(ordner_liste)}</div><div class="stat-label">Themen-Ordner</div></div>', unsafe_allow_html=True)
 
-        st.markdown(
-            f'<div class="flashcard-box" style="border-color:#7DD3FC;">'
-            f'<div class="flashcard-answer-label">Lösung</div>'
-            f'<div class="flashcard-answer-body">{antwort_html}</div>'
-            f'{erklaerung_block}'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+# --- Themen-Fortschritt ---
+if ordner_liste:
+    st.markdown('<div style="height:1.1rem;"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-kicker">Themen-Fortschritt (Anki-Status)</div>', unsafe_allow_html=True)
+    for idx in range(0, len(ordner_liste), 2):
+        t_cols = st.columns(2)
+        with t_cols[0]:
+            st.markdown(baue_themen_fortschritt_html(ordner_liste[idx]), unsafe_allow_html=True)
+        if idx + 1 < len(ordner_liste):
+            with t_cols[1]:
+                st.markdown(baue_themen_fortschritt_html(ordner_liste[idx + 1]), unsafe_allow_html=True)
 
-        st.caption("Wie gut konntest du die Aufgabe lösen?")
-        b1, b2, b3, b4 = st.columns(4)
+st.markdown('<div style="height:1.05rem;"></div>', unsafe_allow_html=True)
 
-        p1 = formatiere_intervall_vorschau(aktuelle_karte["ease_factor"], aktuelle_karte["interval_days"], aktuelle_karte["repetitions"], aktuelle_karte["lapses"], 1)
-        p2 = formatiere_intervall_vorschau(aktuelle_karte["ease_factor"], aktuelle_karte["interval_days"], aktuelle_karte["repetitions"], aktuelle_karte["lapses"], 2)
-        p3 = formatiere_intervall_vorschau(aktuelle_karte["ease_factor"], aktuelle_karte["interval_days"], aktuelle_karte["repetitions"], aktuelle_karte["lapses"], 3)
-        p4 = formatiere_intervall_vorschau(aktuelle_karte["ease_factor"], aktuelle_karte["interval_days"], aktuelle_karte["repetitions"], aktuelle_karte["lapses"], 4)
+tab_lernen, tab_upload, tab_ordner = st.tabs([
+    "🎯 Lernen (Spaced Repetition)",
+    "📄 Dokumente & Kartengenerator",
+    "📁 Ordner & Kartenverwaltung"
+])
 
-        gewaehlte_bewertung = None
-        if b1.button(f"❌ Nochmal\n({p1})", use_container_width=True):
-            gewaehlte_bewertung = 1
-        if b2.button(f"🟠 Schwer\n({p2})", use_container_width=True):
-            gewaehlte_bewertung = 2
-        if b3.button(f"🔵 Gut\n({p3})", use_container_width=True):
-            gewaehlte_bewertung = 3
-        if b4.button(f"🟢 Leicht\n({p4})", use_container_width=True):
-            gewaehlte_bewertung = 4
+# ==============================================================================
+# TAB 1: LERNEN
+# ==============================================================================
+with tab_lernen:
+    if st.session_state.last_xp_event:
+        st.markdown(f'<div class="xp-banner">{html.escape(st.session_state.last_xp_event)}</div>', unsafe_allow_html=True)
 
-        if gewaehlte_bewertung is not None:
-            ef, iv, reps, lapses, next_rev = berechne_sm2(
-                aktuelle_karte["ease_factor"],
-                aktuelle_karte["interval_days"],
-                aktuelle_karte["repetitions"],
-                aktuelle_karte["lapses"],
-                gewaehlte_bewertung,
-            )
+    col_f, col_m, col_btn = st.columns([2.2, 2.2, 1.4])
+    ordner_optionen = {"Alle Ordner": None}
+    for o in ordner_liste:
+        ordner_optionen[f"{o['name']} ({o['due_cards']} fällig)"] = o["id"]
 
-            erfolgreich = (gewaehlte_bewertung in (2, 3, 4))
-            alter_success_count = int(aktuelle_karte.get("success_count", 0))
-            war_erste_loesung = (erfolgreich and alter_success_count == 0)
-            neuer_success_count = alter_success_count + (1 if erfolgreich else 0)
+    gewaehlter_ordner_label = col_f.selectbox("Lernbereich wählen", list(ordner_optionen.keys()))
+    gewaehlter_ordner_id = ordner_optionen[gewaehlter_ordner_label]
 
-            fertige_karte = st.session_state.study_queue.pop(0)
+    modus_optionen = {
+        "Fällige Karten (Spaced Repetition)": "due",
+        "Nur bisher falsche Karten (Fehler-Training)": "weak",
+        "Alle Karten im Stapel durchgehen": "all"
+    }
+    gewaehlter_modus_label = col_m.selectbox("Lernmodus", list(modus_optionen.keys()))
+    gewaehlter_modus = modus_optionen[gewaehlter_modus_label]
 
-            st.session_state.last_xp_event = verarbeite_bewertung_sofort(
-                aktuelle_karte=fertige_karte,
-                ef=ef,
-                iv=iv,
-                reps=reps,
-                lapses=lapses,
-                next_rev=next_rev,
-                neuer_success_count=neuer_success_count,
-                erfolgreich=erfolgreich,
-                war_erste_loesung=war_erste_loesung,
-            )
-
-            if gewaehlte_bewertung == 1:
-                einfuege_pos = min(2, len(st.session_state.study_queue))
-                st.session_state.study_queue.insert(einfuege_pos, fertige_karte)
-            else:
-                st.session_state.study_done_count += 1
-
+    with col_btn:
+        st.markdown('<div style="height:1.72rem;"></div>', unsafe_allow_html=True)
+        if st.button("▶ Sitzung starten", use_container_width=True):
+            hole_ordner_schnell(force_refresh=True)
+            karten = lade_lernkarten(folder_id=gewaehlter_ordner_id, modus=gewaehlter_modus)
+            st.session_state.study_queue = list(karten)
             st.session_state.study_show_answer = False
+            st.session_state.study_done_count = 0
+            st.session_state.study_initial_total = len(karten)
+            st.session_state.study_label = f"{gewaehlter_ordner_label} · {gewaehlter_modus_label}"
+            st.session_state.last_xp_event = None
             st.rerun()
 
-# ==============================================================================
-# ANSICHT 2: GESAMTÜBERSICHT & VERWALTUNG (WENN GERADE NICHT GELERNT WIRD)
-# ==============================================================================
-else:
-    col_brand, col_cursor_btn = st.columns([4.5, 1.5])
-    with col_brand:
+    st.markdown("---")
+
+    if st.session_state.study_queue:
+        aktuelle_karte = st.session_state.study_queue[0]
+        rest = len(st.session_state.study_queue)
+        erledigt = st.session_state.study_done_count
+        gesamt_sitzung = max(1, erledigt + rest)
+
+        st.progress(erledigt / gesamt_sitzung, text=f"Fortschritt: {erledigt} abgeschlossen · {rest} verbleibend")
+
+        war_neu = (int(aktuelle_karte.get("success_count", 0)) == 0)
+        sim_streak = answer_streak + 1
+        aktueller_streak_bonus = 0
+        if sim_streak >= 10:
+            if b10_start is None or (now_utc - b10_start).total_seconds() < 1800:
+                aktueller_streak_bonus = 1
+        if sim_streak >= 20:
+            if b20_start is None or (now_utc - b20_start).total_seconds() < 1800:
+                aktueller_streak_bonus = 2
+
+        moegliche_xp = (2 if war_neu else 1) + aktueller_streak_bonus
+
+        anzeige_typ = "Problemstellung" if aktuelle_karte["card_type"] == "Transfer" else aktuelle_karte["card_type"]
+        folder_esc = html.escape(str(aktuelle_karte["folder_name"]))
+        typ_esc = html.escape(str(anzeige_typ))
+
+        badges_html = (
+            f'<span class="flashcard-badge">{folder_esc} · {typ_esc}</span>'
+            f'<span class="flashcard-badge-xp">+{moegliche_xp} XP bei Erfolg</span>'
+        )
+        if aktuelle_karte.get("lapses", 0) > 0:
+            badges_html += f'<span class="flashcard-badge-warn">Wiederholung ({aktuelle_karte["lapses"]}× falsch)</span>'
+
+        ist_lueckentext = (anzeige_typ == "Lückentext")
+        frage_html = formatiere_kartentext_html(aktuelle_karte["question"], ist_lueckentext=ist_lueckentext)
+
         st.markdown(
-            '<div class="omni-header" style="border-bottom:none;margin-bottom:0;padding-bottom:0;"><div><div class="omni-brand">OmniLearn</div><div class="omni-tagline">Active Recall & Spaced Repetition</div></div></div>',
+            f'<div class="flashcard-box">'
+            f'<div class="flashcard-meta">{badges_html}</div>'
+            f'<div class="flashcard-question">{frage_html}</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
 
-    with col_cursor_btn:
-        st.markdown('<div style="height:0.35rem;"></div>', unsafe_allow_html=True)
-        with st.popover(f"🖱️ Maus: {aktiver_cursor['short']}", use_container_width=True):
-            st.markdown("**Freigeschaltete Maus-Symbole**")
-            st.caption("Alle 5 Level schaltest du ein neues Symbol für deinen Mauszeiger frei.")
-            for item in CURSOR_MILESTONES:
-                freigeschaltet = aktuelles_level >= item["level"]
-                if item["svg"]:
-                    uri = svg_zu_data_uri(item["svg"])
-                    icon_html = f'<img src="{uri}" width="20" height="20" style="vertical-align:middle;margin-right:6px;"/>'
-                else:
-                    icon_html = "↖️ "
+        mc_options = []
+        if aktuelle_karte["card_type"] == "Multiple Choice":
+            try:
+                mc_options = json.loads(aktuelle_karte.get("options_json") or "[]")
+            except Exception:
+                mc_options = []
 
-                status = "Freigeschaltet" if freigeschaltet else f"Ab Level {item['level']}"
-                label_row = f'{icon_html}<b>{item["name"]}</b> — <span style="color:#94A3B8;font-size:0.82rem;">{status}</span>'
-                st.markdown(label_row, unsafe_allow_html=True)
+        gewaehlte_mc = None
+        if mc_options:
+            gewaehlte_mc = st.radio(
+                "Wähle eine der 4 Antwortoptionen:",
+                mc_options,
+                key=f"mc_radio_{aktuelle_karte['id']}_{erledigt}"
+            )
 
-                if freigeschaltet:
-                    ist_aktiv = (aktiver_cursor["level"] == item["level"])
-                    btn_txt = "✓ Aktiv" if ist_aktiv else "Auswählen"
-                    if st.button(btn_txt, key=f"cur_sel_{item['level']}", disabled=ist_aktiv, use_container_width=True):
-                        setze_ausgewaehlten_cursor(item["level"])
-                        st.rerun()
-
-    st.markdown('<hr style="margin-top:0.6rem;margin-bottom:1.1rem;">', unsafe_allow_html=True)
-
-    # --- Level- & Tagesquest-Karten ---
-    xp_im_lvl = int(user_prog["xp_in_level"])
-    xp_ziel_lvl = xp_fuer_naechstes_level(aktuelles_level)
-    lvl_prozent = min(100, round((xp_im_lvl / max(1, xp_ziel_lvl)) * 100))
-
-    bonus_val = 0
-    time_left = 0
-
-    if b20_start and (now_utc - b20_start).total_seconds() < 1800:
-        bonus_val = 2
-        time_left = int(30 - (now_utc - b20_start).total_seconds() // 60)
-    elif b10_start and (now_utc - b10_start).total_seconds() < 1800:
-        bonus_val = 1
-        time_left = int(30 - (now_utc - b10_start).total_seconds() // 60)
-
-    if bonus_val == 2:
-        streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Serie (+2 XP / {time_left} Min)</span>'
-    elif bonus_val == 1:
-        streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Serie (+1 XP / {time_left} Min)</span>'
-    else:
-        b10_used = b10_start is not None and (now_utc - b10_start).total_seconds() >= 1800
-        b20_used = b20_start is not None and (now_utc - b20_start).total_seconds() >= 1800
-        if answer_streak >= 20 and b20_used:
-            streak_html = f'<span class="streak-chip">Serie: {answer_streak} (Tages-Boosts verbraucht)</span>'
-        elif answer_streak >= 10 and b10_used and not b20_start:
-            streak_html = f'<span class="streak-chip">Serie: {answer_streak} (Boost 2 ab Serie 20)</span>'
+        if not st.session_state.study_show_answer:
+            if st.button("Antwort aufdecken", use_container_width=True):
+                st.session_state.study_show_answer = True
+                st.rerun()
         else:
-            streak_html = f'<span class="streak-chip">Serie: {answer_streak} richtig in Folge</span>'
+            if mc_options and gewaehlte_mc is not None:
+                if gewaehlte_mc.strip().lower() == aktuelle_karte["answer"].strip().lower():
+                    st.success("Richtig ausgewählt!")
+                else:
+                    st.error(f"Deine Auswahl: **{gewaehlte_mc}** — das war leider nicht richtig.")
 
-    naechster_cursor = next((c for c in CURSOR_MILESTONES if c["level"] > aktuelles_level), None)
-    cursor_vorschau_txt = (
-        f"Nächstes Maus-Symbol ab Lv. {naechster_cursor['level']}: {naechster_cursor['name']}"
-        if naechster_cursor else "Alle Maus-Symbole freigeschaltet"
-    )
+            antwort_html = formatiere_kartentext_html(aktuelle_karte["answer"], ist_lueckentext=False)
+            erklaerung = str(aktuelle_karte.get("explanation") or "").strip()
+            erklaerung_block = (
+                f'<div class="flashcard-explanation">💡 {formatiere_kartentext_html(erklaerung)}</div>'
+                if erklaerung else ""
+            )
 
-    daily_done = int(user_prog["daily_cards_done"])
-    daily_pct = min(100, round((daily_done / DAILY_GOAL_TARGET) * 100))
-    daily_claimed = bool(user_prog["daily_quest_claimed"])
-    quest_streak = int(user_prog["daily_quest_streak"])
-    tage_im_zyklus = quest_streak % 7 if (quest_streak % 7 != 0 or quest_streak == 0) else 7
+            st.markdown(
+                f'<div class="flashcard-box" style="border-color:#7DD3FC;">'
+                f'<div class="flashcard-answer-label">Lösung</div>'
+                f'<div class="flashcard-answer-body">{antwort_html}</div>'
+                f'{erklaerung_block}'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
 
-    dots_html = "".join(
-        f'<span class="day-dot {"day-dot-active" if i < tage_im_zyklus else ""}"></span>'
-        for i in range(7)
-    )
-    quest_status_txt = (
-        f"Tagesziel erfüllt (+{DAILY_GOAL_BONUS_XP} XP erhalten)"
-        if daily_claimed else f"Noch {max(0, DAILY_GOAL_TARGET - daily_done)} Karten bis +{DAILY_GOAL_BONUS_XP} XP"
-    )
+            st.caption("Wie gut konntest du die Aufgabe lösen?")
+            b1, b2, b3, b4 = st.columns(4)
 
-    col_lvl, col_quest = st.columns(2)
-    with col_lvl:
-        st.markdown(
-            f'<div class="sculpt-panel">'
-            f'<div class="panel-top-row"><span class="level-pill">Level {aktuelles_level}</span><span class="xp-meta">{xp_im_lvl} / {xp_ziel_lvl} XP</span></div>'
-            f'<div class="progress-track"><div class="progress-fill-ice" style="width:{lvl_prozent}%;"></div></div>'
-            f'<div class="panel-footer-row">{streak_html}<span>{cursor_vorschau_txt}</span></div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+            p1 = formatiere_intervall_vorschau(aktuelle_karte["ease_factor"], aktuelle_karte["interval_days"], aktuelle_karte["repetitions"], aktuelle_karte["lapses"], 1)
+            p2 = formatiere_intervall_vorschau(aktuelle_karte["ease_factor"], aktuelle_karte["interval_days"], aktuelle_karte["repetitions"], aktuelle_karte["lapses"], 2)
+            p3 = formatiere_intervall_vorschau(aktuelle_karte["ease_factor"], aktuelle_karte["interval_days"], aktuelle_karte["repetitions"], aktuelle_karte["lapses"], 3)
+            p4 = formatiere_intervall_vorschau(aktuelle_karte["ease_factor"], aktuelle_karte["interval_days"], aktuelle_karte["repetitions"], aktuelle_karte["lapses"], 4)
 
-    with col_quest:
-        st.markdown(
-            f'<div class="sculpt-panel">'
-            f'<div class="panel-top-row"><span style="font-weight:700;color:#F8FAFC;font-size:0.98rem;">Tagesziel: {min(daily_done, DAILY_GOAL_TARGET)} / {DAILY_GOAL_TARGET} Karten</span><span class="xp-meta">{quest_status_txt}</span></div>'
-            f'<div class="progress-track"><div class="progress-fill-quest" style="width:{daily_pct}%;"></div></div>'
-            f'<div class="panel-footer-row"><span>7-Tage-Quest (Volles Level-Up): <b>{quest_streak}</b> Tage</span><span class="day-dots">{dots_html}</span></div>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+            gewaehlte_bewertung = None
+            if b1.button(f"❌ Nochmal\n({p1})", use_container_width=True):
+                gewaehlte_bewertung = 1
+            if b2.button(f"🟠 Schwer\n({p2})", use_container_width=True):
+                gewaehlte_bewertung = 2
+            if b3.button(f"🔵 Gut\n({p3})", use_container_width=True):
+                gewaehlte_bewertung = 3
+            if b4.button(f"🟢 Leicht\n({p4})", use_container_width=True):
+                gewaehlte_bewertung = 4
 
-    st.markdown('<div style="height:0.95rem;"></div>', unsafe_allow_html=True)
+            if gewaehlte_bewertung is not None:
+                ef, iv, reps, lapses, next_rev = berechne_sm2(
+                    aktuelle_karte["ease_factor"],
+                    aktuelle_karte["interval_days"],
+                    aktuelle_karte["repetitions"],
+                    aktuelle_karte["lapses"],
+                    gewaehlte_bewertung,
+                )
 
-    # --- Status-Kacheln ---
-    ordner_liste = hole_ordner_schnell()
-    gesamt_karten = sum(o["total_cards"] for o in ordner_liste)
-    gesamt_faellig = sum(o["due_cards"] for o in ordner_liste)
-    gesamt_schwach = sum(o["kritisch_cards"] for o in ordner_liste)
+                erfolgreich = (gewaehlte_bewertung in (2, 3, 4))
+                alter_success_count = int(aktuelle_karte.get("success_count", 0))
+                war_erste_loesung = (erfolgreich and alter_success_count == 0)
+                neuer_success_count = alter_success_count + (1 if erfolgreich else 0)
 
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_faellig}</div><div class="stat-label">Heute fällig</div></div>', unsafe_allow_html=True)
-    with c2:
-        st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_schwach}</div><div class="stat-label">Kritisch / Öfter falsch</div></div>', unsafe_allow_html=True)
-    with c3:
-        st.markdown(f'<div class="stat-card"><div class="stat-num">{gesamt_karten}</div><div class="stat-label">Karten gesamt</div></div>', unsafe_allow_html=True)
-    with c4:
-        st.markdown(f'<div class="stat-card"><div class="stat-num">{len(ordner_liste)}</div><div class="stat-label">Themen-Ordner</div></div>', unsafe_allow_html=True)
+                fertige_karte = st.session_state.study_queue.pop(0)
 
-    # --- Themen-Fortschritt ---
-    if ordner_liste:
-        st.markdown('<div style="height:1.1rem;"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="section-kicker">Themen-Fortschritt (Anki-Status)</div>', unsafe_allow_html=True)
-        for idx in range(0, len(ordner_liste), 2):
-            t_cols = st.columns(2)
-            with t_cols[0]:
-                st.markdown(baue_themen_fortschritt_html(ordner_liste[idx]), unsafe_allow_html=True)
-            if idx + 1 < len(ordner_liste):
-                with t_cols[1]:
-                    st.markdown(baue_themen_fortschritt_html(ordner_liste[idx + 1]), unsafe_allow_html=True)
+                st.session_state.last_xp_event = verarbeite_bewertung_sofort(
+                    aktuelle_karte=fertige_karte,
+                    ef=ef,
+                    iv=iv,
+                    reps=reps,
+                    lapses=lapses,
+                    next_rev=next_rev,
+                    neuer_success_count=neuer_success_count,
+                    erfolgreich=erfolgreich,
+                    war_erste_loesung=war_erste_loesung,
+                )
 
-    st.markdown('<div style="height:1.05rem;"></div>', unsafe_allow_html=True)
+                if gewaehlte_bewertung == 1:
+                    einfuege_pos = min(2, len(st.session_state.study_queue))
+                    st.session_state.study_queue.insert(einfuege_pos, fertige_karte)
+                else:
+                    st.session_state.study_done_count += 1
 
-    tab_lernen, tab_upload, tab_ordner = st.tabs([
-        "🎯 Lernen (Spaced Repetition)",
-        "📄 Dokumente & Kartengenerator",
-        "📁 Ordner & Kartenverwaltung"
-    ])
-
-    # ==========================================================================
-    # TAB 1: LERNEN STARTEN
-    # ==========================================================================
-    with tab_lernen:
-        if st.session_state.study_initial_total > 0 and st.session_state.study_done_count > 0:
-            st.success(f"Stark! Alle {st.session_state.study_done_count} Karten der letzten Sitzung abgeschlossen.")
-            if st.session_state.last_xp_event:
-                st.markdown(f'<div class="xp-banner">{html.escape(st.session_state.last_xp_event)}</div>', unsafe_allow_html=True)
-
-        col_f, col_m, col_btn = st.columns([2.2, 2.2, 1.4])
-        ordner_optionen = {"Alle Ordner": None}
-        for o in ordner_liste:
-            ordner_optionen[f"{o['name']} ({o['due_cards']} fällig)"] = o["id"]
-
-        gewaehlter_ordner_label = col_f.selectbox("Lernbereich wählen", list(ordner_optionen.keys()))
-        gewaehlter_ordner_id = ordner_optionen[gewaehlter_ordner_label]
-
-        modus_optionen = {
-            "Fällige Karten (Spaced Repetition)": "due",
-            "Nur bisher falsche Karten (Fehler-Training)": "weak",
-            "Alle Karten im Stapel durchgehen": "all"
-        }
-        gewaehlter_modus_label = col_m.selectbox("Lernmodus", list(modus_optionen.keys()))
-        gewaehlter_modus = modus_optionen[gewaehlter_modus_label]
-
-        with col_btn:
-            st.markdown('<div style="height:1.72rem;"></div>', unsafe_allow_html=True)
-            if st.button("▶ Sitzung starten", use_container_width=True):
-                hole_ordner_schnell(force_refresh=True)
-                karten = lade_lernkarten(folder_id=gewaehlter_ordner_id, modus=gewaehlter_modus)
-                st.session_state.study_queue = list(karten)
                 st.session_state.study_show_answer = False
-                st.session_state.study_done_count = 0
-                st.session_state.study_initial_total = len(karten)
-                st.session_state.study_label = f"{gewaehlter_ordner_label} · {gewaehlter_modus_label}"
-                st.session_state.last_xp_event = None
-                if not karten:
-                    st.warning("Für diese Auswahl sind aktuell keine Karten fällig.")
-                else:
-                    st.rerun()
+                st.rerun()
 
-        if gesamt_karten == 0:
+    else:
+        if st.session_state.study_initial_total > 0 and st.session_state.study_done_count > 0:
+            st.success(f"Stark! Alle {st.session_state.study_done_count} Karten dieser Sitzung abgeschlossen.")
+        elif gesamt_karten == 0:
             st.info("Du hast noch keine Karteikarten erstellt. Lege unter **Dokumente & Kartengenerator** deinen ersten Ordner an und lade ein Skript hoch.")
-
-    # ==========================================================================
-    # TAB 2: DOKUMENTE HOCHLADEN & KARTEIKARTEN GENERIEREN
-    # ==========================================================================
-    with tab_upload:
-        st.markdown('<div class="ar-subtitle">1. Zielordner auswählen oder neu anlegen</div>', unsafe_allow_html=True)
-
-        col_new1, col_new2 = st.columns([3.5, 1])
-        neuer_ordner_name = col_new1.text_input("Neuen Ordner anlegen", label_visibility="collapsed", placeholder="Neuen Ordnernamen eingeben (z. B. Makroökonomie, BGB AT)...")
-        if col_new2.button("➕ Ordner erstellen", use_container_width=True):
-            if neuer_ordner_name.strip():
-                if erstelle_ordner(neuer_ordner_name):
-                    st.success(f"Ordner **{neuer_ordner_name.strip()}** erstellt!")
-                    st.rerun()
-                else:
-                    st.warning("Dieser Ordner existiert bereits.")
-            else:
-                st.warning("Bitte gib einen Ordnernamen ein.")
-
-        ordner_liste = hole_ordner_schnell()
-        if not ordner_liste:
-            st.warning("Bitte lege zuerst oben einen Ordner an, in dem deine Dokumente und Karten gespeichert werden.")
         else:
-            ziel_ordner_map = {o["name"]: o["id"] for o in ordner_liste}
-            ziel_ordner_name = st.selectbox("Zielordner für deine Dokumente", list(ziel_ordner_map.keys()))
-            ziel_ordner_id = ziel_ordner_map[ziel_ordner_name]
+            st.info("Klicke oben auf **▶ Sitzung starten**, um deine fälligen Karten abzurufen.")
 
-            st.markdown('<div class="ar-subtitle">2. Dokumente hochladen & abwechslungsreiche Lernkarten erstellen</div>', unsafe_allow_html=True)
-            uploaded_files = st.file_uploader(
-                "Dokumente auswählen (PDF, DOCX, TXT, MD – auch mehrere gleichzeitig)",
-                type=["pdf", "docx", "txt", "md"],
-                accept_multiple_files=True
-            )
+# ==============================================================================
+# TAB 2: DOKUMENTE HOCHLADEN & KARTEIKARTEN GENERIEREN
+# ==============================================================================
+with tab_upload:
+    st.markdown('<div class="ar-subtitle">1. Zielordner auswählen oder neu anlegen</div>', unsafe_allow_html=True)
 
-            col_opt1, col_opt2 = st.columns([1, 2])
-            karten_pro_dok = col_opt1.slider("Karten pro Dokument", min_value=4, max_value=24, value=8)
-            gewaehlte_typen = col_opt2.multiselect(
-                "Aufgaben-Mix (werden abwechselnd generiert)",
-                ["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"],
-                default=["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"]
-            )
+    col_new1, col_new2 = st.columns([3.5, 1])
+    neuer_ordner_name = col_new1.text_input("Neuen Ordner anlegen", label_visibility="collapsed", placeholder="Neuen Ordnernamen eingeben (z. B. Makroökonomie, BGB AT)...")
+    if col_new2.button("➕ Ordner erstellen", use_container_width=True):
+        if neuer_ordner_name.strip():
+            if erstelle_ordner(neuer_ordner_name):
+                st.success(f"Ordner **{neuer_ordner_name.strip()}** erstellt!")
+                st.rerun()
+            else:
+                st.warning("Dieser Ordner existiert bereits.")
+        else:
+            st.warning("Bitte gib einen Ordnernamen ein.")
 
-            if st.button("⚡ Abwechslungsreiche Lernkarten generieren", use_container_width=True):
-                if not uploaded_files:
-                    st.warning("Bitte lade zuerst mindestens eine Datei hoch.")
-                elif not gewaehlte_typen:
-                    st.warning("Bitte wähle mindestens einen Aufgabentyp aus.")
-                else:
-                    gesamt_erstellt = 0
-                    for datei in uploaded_files:
-                        with st.spinner(f"Lese '{datei.name}' aus und erstelle Lückentexte, Problemstellungen & Multiple-Choice-Fragen..."):
-                            try:
-                                text = extrahiere_text_aus_datei(datei)
-                                if len(text) < 40:
-                                    st.warning(f"In '{datei.name}' konnte kaum Text gefunden werden (evtl. reiner Bild-Scan).")
-                                    continue
-                                neue_karten = generiere_karteikarten(text, karten_pro_dok, gewaehlte_typen)
-                                speichere_dokument_und_karten(ziel_ordner_id, datei.name, len(text), neue_karten, content_text=text)
-                                gesamt_erstellt += len(neue_karten)
-                            except Exception as e:
-                                st.error(f"Fehler bei '{datei.name}': {e}")
+    ordner_liste = hole_ordner_schnell()
+    if not ordner_liste:
+        st.warning("Bitte lege zuerst oben einen Ordner an, in dem deine Dokumente und Karten gespeichert werden.")
+    else:
+        ziel_ordner_map = {o["name"]: o["id"] for o in ordner_liste}
+        ziel_ordner_name = st.selectbox("Zielordner für deine Dokumente", list(ziel_ordner_map.keys()))
+        ziel_ordner_id = ziel_ordner_map[ziel_ordner_name]
 
-                    if gesamt_erstellt > 0:
-                        st.success(f"{gesamt_erstellt} abwechslungsreiche Lernkarten wurden im Ordner **{ziel_ordner_name}** gespeichert!")
+        st.markdown('<div class="ar-subtitle">2. Dokumente hochladen & abwechslungsreiche Lernkarten erstellen</div>', unsafe_allow_html=True)
+        uploaded_files = st.file_uploader(
+            "Dokumente auswählen (PDF, DOCX, TXT, MD – auch mehrere gleichzeitig)",
+            type=["pdf", "docx", "txt", "md"],
+            accept_multiple_files=True
+        )
+
+        col_opt1, col_opt2 = st.columns([1, 2])
+        karten_pro_dok = col_opt1.slider("Karten pro Dokument", min_value=4, max_value=24, value=8)
+        gewaehlte_typen = col_opt2.multiselect(
+            "Aufgaben-Mix (werden abwechselnd generiert)",
+            ["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"],
+            default=["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"]
+        )
+
+        if st.button("⚡ Abwechslungsreiche Lernkarten generieren", use_container_width=True):
+            if not uploaded_files:
+                st.warning("Bitte lade zuerst mindestens eine Datei hoch.")
+            elif not gewaehlte_typen:
+                st.warning("Bitte wähle mindestens einen Aufgabentyp aus.")
+            else:
+                gesamt_erstellt = 0
+                for datei in uploaded_files:
+                    with st.spinner(f"Lese '{datei.name}' aus und erstelle Lückentexte, Problemstellungen & Multiple-Choice-Fragen..."):
+                        try:
+                            text = extrahiere_text_aus_datei(datei)
+                            if len(text) < 40:
+                                st.warning(f"In '{datei.name}' konnte kaum Text gefunden werden (evtl. reiner Bild-Scan).")
+                                continue
+                            neue_karten = generiere_karteikarten(text, karten_pro_dok, gewaehlte_typen)
+                            speichere_dokument_und_karten(ziel_ordner_id, datei.name, len(text), neue_karten, content_text=text)
+                            gesamt_erstellt += len(neue_karten)
+                        except Exception as e:
+                            st.error(f"Fehler bei '{datei.name}': {e}")
+
+                if gesamt_erstellt > 0:
+                    st.success(f"{gesamt_erstellt} abwechslungsreiche Lernkarten wurden im Ordner **{ziel_ordner_name}** gespeichert!")
+                    st.rerun()
+
+# ==============================================================================
+# TAB 3: ORDNER- & KARTENVERWALTUNG
+# ==============================================================================
+with tab_ordner:
+    if not ordner_liste:
+        st.info("Noch keine Ordner vorhanden.")
+    else:
+        verw_ordner_map = {f"{o['name']} ({o['total_cards']} Karten · {o['doc_count']} Dokumente)": o for o in ordner_liste}
+        auswahl_label = st.selectbox("Ordner inspizieren", list(verw_ordner_map.keys()))
+        akt_ordner = verw_ordner_map[auswahl_label]
+
+        st.markdown(baue_themen_fortschritt_html(akt_ordner), unsafe_allow_html=True)
+
+        st.markdown('<div class="ar-subtitle">Hinterlegte Dokumente in diesem Ordner</div>', unsafe_allow_html=True)
+        doks = lade_dokumente_fuer_ordner(akt_ordner["id"])
+        if doks:
+            for d in doks:
+                datum_str = d["uploaded_at"].astimezone(BERLIN_TZ).strftime("%d.%m.%Y %H:%M")
+                col_doc1, col_doc2 = st.columns([3.5, 1.5])
+                with col_doc1:
+                    st.markdown(f"- **{d['filename']}** ({d['card_count']} Karten · hochgeladen am {datum_str})")
+                with col_doc2:
+                    if d.get("content_text") and len(d["content_text"]) >= 40:
+                        if st.button("➕ 8 neue Mix-Karten", key=f"regen_doc_{d['id']}", use_container_width=True):
+                            with st.spinner("Generiere neuen Aufgaben-Mix..."):
+                                neue = generiere_karteikarten(
+                                    d["content_text"],
+                                    8,
+                                    ["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"]
+                                )
+                                fuege_karten_zu_dokument_hinzu(akt_ordner["id"], d["id"], neue)
+                                st.rerun()
+        else:
+            st.caption("In diesem Ordner wurden noch keine Dokumente hochgeladen.")
+
+        st.markdown("---")
+
+        st.markdown('<div class="ar-subtitle">Enthaltene Karteikarten & Spaced-Repetition-Status</div>', unsafe_allow_html=True)
+        status_filter = st.radio(
+            "Nach Anki-Status filtern:",
+            [
+                "Alle Karten",
+                "🔵 Gut gelernt",
+                "🟡 Wackelig",
+                "🔴 Kritisch / Öfter falsch",
+                "⚫ Ungelernt",
+            ],
+            horizontal=True,
+        )
+
+        filter_map = {
+            "🔵 Gut gelernt": "gut",
+            "🟡 Wackelig": "wackelig",
+            "🔴 Kritisch / Öfter falsch": "kritisch",
+            "⚫ Ungelernt": "neu",
+        }
+        badge_map = {
+            "gut": "🔵 Gut gelernt",
+            "wackelig": "🟡 Wackelig",
+            "kritisch": "🔴 Kritisch",
+            "neu": "⚫ Ungelernt",
+        }
+
+        alle_karten_ordner = lade_lernkarten(folder_id=akt_ordner["id"], modus="all")
+        if alle_karten_ordner:
+            jetzt_utc = datetime.datetime.now(datetime.timezone.utc)
+            gefilterte_karten = [
+                k for k in alle_karten_ordner
+                if status_filter == "Alle Karten" or klassifiziere_karte_anki(k) == filter_map[status_filter]
+            ]
+            if not gefilterte_karten:
+                st.caption("Keine Karten in dieser Kategorie vorhanden.")
+            for k in gefilterte_karten:
+                anki_kat = klassifiziere_karte_anki(k)
+                faellig = k["next_review"] <= jetzt_utc
+                status_txt = "Jetzt fällig" if faellig else f"Fällig am {k['next_review'].astimezone(BERLIN_TZ).strftime('%d.%m.%Y')}"
+                fehler_txt = f" · {k['lapses']}× falsch" if k["lapses"] > 0 else ""
+                typ_label = "Problemstellung" if k["card_type"] == "Transfer" else k["card_type"]
+                with st.expander(f"{badge_map[anki_kat]} · [{typ_label}] {k['question'][:80]} ({status_txt}{fehler_txt})"):
+                    st.markdown(f"**Frage:** {k['question']}")
+                    if typ_label == "Multiple Choice" and k.get("options_json"):
+                        try:
+                            opts_prev = json.loads(k["options_json"])
+                            if opts_prev:
+                                st.markdown("**Optionen:** " + " · ".join(opts_prev))
+                        except Exception:
+                            pass
+                    st.markdown(f"**Antwort:** {k['answer']}")
+                    if k.get("explanation"):
+                        st.caption(f"Erklärung: {k['explanation']}")
+                    st.caption(f"Intervall: {k['interval_days']} Tage · Wiederholungen: {k['repetitions']} · Leichtigkeit: {k['ease_factor']:.2f}")
+                    if st.button("Karte löschen", key=f"del_card_{k['id']}"):
+                        loesche_karte(k["id"])
                         st.rerun()
-
-    # ==========================================================================
-    # TAB 3: ORDNER- & KARTENVERWALTUNG
-    # ==========================================================================
-    with tab_ordner:
-        if not ordner_liste:
-            st.info("Noch keine Ordner vorhanden.")
         else:
-            verw_ordner_map = {f"{o['name']} ({o['total_cards']} Karten · {o['doc_count']} Dokumente)": o for o in ordner_liste}
-            auswahl_label = st.selectbox("Ordner inspizieren", list(verw_ordner_map.keys()))
-            akt_ordner = verw_ordner_map[auswahl_label]
+            st.caption("Noch keine Karteikarten in diesem Ordner.")
 
-            st.markdown(baue_themen_fortschritt_html(akt_ordner), unsafe_allow_html=True)
-
-            st.markdown('<div class="ar-subtitle">Hinterlegte Dokumente in diesem Ordner</div>', unsafe_allow_html=True)
-            doks = lade_dokumente_fuer_ordner(akt_ordner["id"])
-            if doks:
-                for d in doks:
-                    datum_str = d["uploaded_at"].astimezone(BERLIN_TZ).strftime("%d.%m.%Y %H:%M")
-                    col_doc1, col_doc2 = st.columns([3.5, 1.5])
-                    with col_doc1:
-                        st.markdown(f"- **{d['filename']}** ({d['card_count']} Karten · hochgeladen am {datum_str})")
-                    with col_doc2:
-                        if d.get("content_text") and len(d["content_text"]) >= 40:
-                            if st.button("➕ 8 neue Mix-Karten", key=f"regen_doc_{d['id']}", use_container_width=True):
-                                with st.spinner("Generiere neuen Aufgaben-Mix..."):
-                                    neue = generiere_karteikarten(
-                                        d["content_text"],
-                                        8,
-                                        ["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"]
-                                    )
-                                    fuege_karten_zu_dokument_hinzu(akt_ordner["id"], d["id"], neue)
-                                    st.rerun()
-            else:
-                st.caption("In diesem Ordner wurden noch keine Dokumente hochgeladen.")
-
-            st.markdown("---")
-
-            st.markdown('<div class="ar-subtitle">Enthaltene Karteikarten & Spaced-Repetition-Status</div>', unsafe_allow_html=True)
-            status_filter = st.radio(
-                "Nach Anki-Status filtern:",
-                [
-                    "Alle Karten",
-                    "🔵 Gut gelernt",
-                    "🟡 Wackelig",
-                    "🔴 Kritisch / Öfter falsch",
-                    "⚫ Ungelernt",
-                ],
-                horizontal=True,
-            )
-
-            filter_map = {
-                "🔵 Gut gelernt": "gut",
-                "🟡 Wackelig": "wackelig",
-                "🔴 Kritisch / Öfter falsch": "kritisch",
-                "⚫ Ungelernt": "neu",
-            }
-            badge_map = {
-                "gut": "🔵 Gut gelernt",
-                "wackelig": "🟡 Wackelig",
-                "kritisch": "🔴 Kritisch",
-                "neu": "⚫ Ungelernt",
-            }
-
-            alle_karten_ordner = lade_lernkarten(folder_id=akt_ordner["id"], modus="all")
-            if alle_karten_ordner:
-                jetzt_utc = datetime.datetime.now(datetime.timezone.utc)
-                gefilterte_karten = [
-                    k for k in alle_karten_ordner
-                    if status_filter == "Alle Karten" or klassifiziere_karte_anki(k) == filter_map[status_filter]
-                ]
-                if not gefilterte_karten:
-                    st.caption("Keine Karten in dieser Kategorie vorhanden.")
-                for k in gefilterte_karten:
-                    anki_kat = klassifiziere_karte_anki(k)
-                    faellig = k["next_review"] <= jetzt_utc
-                    status_txt = "Jetzt fällig" if faellig else f"Fällig am {k['next_review'].astimezone(BERLIN_TZ).strftime('%d.%m.%Y')}"
-                    fehler_txt = f" · {k['lapses']}× falsch" if k["lapses"] > 0 else ""
-                    typ_label = "Problemstellung" if k["card_type"] == "Transfer" else k["card_type"]
-                    with st.expander(f"{badge_map[anki_kat]} · [{typ_label}] {k['question'][:80]} ({status_txt}{fehler_txt})"):
-                        st.markdown(f"**Frage:** {k['question']}")
-                        if typ_label == "Multiple Choice" and k.get("options_json"):
-                            try:
-                                opts_prev = json.loads(k["options_json"])
-                                if opts_prev:
-                                    st.markdown("**Optionen:** " + " · ".join(opts_prev))
-                            except Exception:
-                                pass
-                        st.markdown(f"**Antwort:** {k['answer']}")
-                        if k.get("explanation"):
-                            st.caption(f"Erklärung: {k['explanation']}")
-                        st.caption(f"Intervall: {k['interval_days']} Tage · Wiederholungen: {k['repetitions']} · Leichtigkeit: {k['ease_factor']:.2f}")
-                        if st.button("Karte löschen", key=f"del_card_{k['id']}"):
-                            loesche_karte(k["id"])
-                            st.rerun()
-            else:
-                st.caption("Noch keine Karteikarten in diesem Ordner.")
-
-            st.markdown("---")
-            with st.expander("Gefahrenzone: Gesamten Ordner löschen"):
-                st.warning(f"Dadurch werden der Ordner **{akt_ordner['name']}** sowie alle darin enthaltenen Dokumente und Karteikarten unwiderruflich gelöscht.")
-                if st.button(f"Ordner '{akt_ordner['name']}' endgültig löschen", key=f"del_folder_{akt_ordner['id']}"):
-                    loesche_ordner(akt_ordner["id"])
-                    st.rerun()
+        st.markdown("---")
+        with st.expander("Gefahrenzone: Gesamten Ordner löschen"):
+            st.warning(f"Dadurch werden der Ordner **{akt_ordner['name']}** sowie alle darin enthaltenen Dokumente und Karteikarten unwiderruflich gelöscht.")
+            if st.button(f"Ordner '{akt_ordner['name']}' endgültig löschen", key=f"del_folder_{akt_ordner['id']}"):
+                loesche_ordner(akt_ordner["id"])
+                st.rerun()
