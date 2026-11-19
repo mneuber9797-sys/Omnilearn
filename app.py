@@ -40,7 +40,7 @@ CURSOR_MILESTONES = [
         "short": "Litschi",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <ellipse cx="16" cy="17.5" rx="10.8" ry="11.5" fill="#E11D48" stroke="#07090E" stroke-width="2"/>
           <ellipse cx="16" cy="17.5" rx="8.2" ry="9" fill="none" stroke="#FB7185" stroke-width="1.2" stroke-dasharray="2 2"/>
           <circle cx="12.5" cy="13.5" r="1.2" fill="#FDA4AF"/><circle cx="19.5" cy="14" r="1.2" fill="#FDA4AF"/>
@@ -54,7 +54,7 @@ CURSOR_MILESTONES = [
         "short": "Panzer",
         "hot_x": 4,
         "hot_y": 14,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <rect x="2.5" y="12.5" width="11.5" height="3.6" rx="1.6" fill="#94A3B8" stroke="#07090E" stroke-width="1.5"/>
           <rect x="11" y="9.5" width="12.5" height="7.2" rx="2.5" fill="#4D7C0F" stroke="#07090E" stroke-width="1.6"/>
           <rect x="6" y="16" width="21.5" height="8.5" rx="4.2" fill="#365314" stroke="#07090E" stroke-width="1.8"/>
@@ -67,7 +67,7 @@ CURSOR_MILESTONES = [
         "short": "Goldbarren",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <polygon points="8,9.5 24,9.5 29.5,23.5 2.5,23.5" fill="#F59E0B" stroke="#07090E" stroke-width="1.8" stroke-linejoin="round"/>
           <polygon points="10,11.5 22,11.5 25.5,20.5 6.5,20.5" fill="#FDE047"/>
           <line x1="11" y1="13.8" x2="21" y2="13.8" stroke="#FEF9C3" stroke-width="1.8" stroke-linecap="round"/>
@@ -79,7 +79,7 @@ CURSOR_MILESTONES = [
         "short": "Blauer Schleim",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <path d="M16 3.5 C16 3.5, 28 14, 28 21.2 C28 26.8, 22.6 29.2, 16 29.2 C9.4 29.2, 4 26.8, 4 21.2 C4 14, 16 3.5, 16 3.5 Z" fill="#0EA5E9" stroke="#07090E" stroke-width="1.8"/>
           <ellipse cx="11" cy="15" rx="2.2" ry="3.5" transform="rotate(-25 11 15)" fill="#BAE6FD"/>
           <circle cx="12.5" cy="21" r="1.9" fill="#FFFFFF"/><circle cx="19.5" cy="21" r="1.9" fill="#FFFFFF"/>
@@ -93,7 +93,7 @@ CURSOR_MILESTONES = [
         "short": "Schneeflocke",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <g stroke="#07090E" stroke-width="3.8" stroke-linecap="round">
             <line x1="16" y1="3" x2="16" y2="29"/><line x1="4.7" y1="9.5" x2="27.3" y2="22.5"/><line x1="27.3" y1="9.5" x2="4.7" y2="22.5"/>
           </g>
@@ -110,7 +110,7 @@ CURSOR_MILESTONES = [
         "short": "Affenkopf",
         "hot_x": 16,
         "hot_y": 16,
-        "svg": """<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="32" height="32" viewBox="0 0 32 32">
+        "svg": """<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
           <circle cx="6.2" cy="16" r="4.2" fill="#92400E" stroke="#07090E" stroke-width="1.6"/>
           <circle cx="25.8" cy="16" r="4.2" fill="#92400E" stroke="#07090E" stroke-width="1.6"/>
           <circle cx="16" cy="16" r="10.5" fill="#78350F" stroke="#07090E" stroke-width="1.8"/>
@@ -139,7 +139,7 @@ def ermittle_aktiven_cursor(level: int, selected_cursor_level: int) -> dict:
 def xp_fuer_naechstes_level(level: int) -> int:
     return 100 + (max(1, int(level)) - 1) * 50
 
-# --- Sichere Text- & HTML-Formatierung ohne Markdown-Codeblock-Artefakte ---
+# --- Sichere Text- & HTML-Formatierung ---
 def formatiere_kartentext_html(rohtext: str, ist_lueckentext: bool = False) -> str:
     bereinigt = html.escape(str(rohtext or "").strip())
     if ist_lueckentext:
@@ -831,7 +831,6 @@ def get_bg_db_queue():
     return q
 
 def enqueue_db_writes(statements: list):
-    """Reiht SQL-Schreibbefehle verzögerungsfrei (0 ms UI-Wartezeit) in die Hintergrund-Queue ein."""
     get_bg_db_queue().put(statements)
 
 @st.cache_resource
@@ -894,9 +893,14 @@ def init_db():
                     stats_date DATE NOT NULL DEFAULT CURRENT_DATE,
                     daily_quest_streak INTEGER NOT NULL DEFAULT 0,
                     last_quest_completed_date DATE,
-                    selected_cursor_level INTEGER NOT NULL DEFAULT -1
+                    selected_cursor_level INTEGER NOT NULL DEFAULT -1,
+                    bonus_10_start TIMESTAMPTZ,
+                    bonus_20_start TIMESTAMPTZ
                 );
             """)
+            cur.execute("ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS bonus_10_start TIMESTAMPTZ;")
+            cur.execute("ALTER TABLE user_progress ADD COLUMN IF NOT EXISTS bonus_20_start TIMESTAMPTZ;")
+
             cur.execute("""
                 INSERT INTO user_progress (id, level, xp_in_level, total_xp, stats_date)
                 VALUES (1, 1, 0, 0, CURRENT_DATE)
@@ -917,7 +921,7 @@ except Exception as e:
     st.info("Prüfe in Streamlit unter **Settings → Secrets**, ob `DATABASE_URL` korrekt eingetragen ist.")
     st.stop()
 
-# --- Fortschritt, XP, Quests & Cursor-Logik (In-Memory Cache + Async DB Sync) ---
+# --- Fortschritt, XP, Quests & Cursor-Logik ---
 def lade_user_progress_aus_db() -> dict:
     heute_berlin = datetime.datetime.now(BERLIN_TZ).date()
     gestern_berlin = heute_berlin - datetime.timedelta(days=1)
@@ -959,7 +963,9 @@ def lade_user_progress_aus_db() -> dict:
                     SET daily_cards_done = %s,
                         daily_quest_claimed = %s,
                         stats_date = %s,
-                        daily_quest_streak = %s
+                        daily_quest_streak = %s,
+                        bonus_10_start = NULL,
+                        bonus_20_start = NULL
                     WHERE id = 1
                     RETURNING *;
                     """,
@@ -1054,15 +1060,10 @@ def verarbeite_bewertung_sofort(
     erfolgreich: bool,
     war_erste_loesung: bool,
 ) -> str:
-    """
-    Aktualisiert Karte, XP/Level/Streak und Themen-Statistiken sofort im RAM (0 ms Wartezeit)
-    und übergibt die SQL-Updates asynchron an den Hintergrund-Worker.
-    """
     heute_berlin = datetime.datetime.now(BERLIN_TZ).date()
     gestern_berlin = heute_berlin - datetime.timedelta(days=1)
     jetzt_utc = datetime.datetime.now(datetime.timezone.utc)
 
-    # 1. Themen-Fortschritt im Speicher live aktualisieren
     alter_status = klassifiziere_karte_anki(aktuelle_karte)
     war_faellig = (aktuelle_karte["next_review"] <= jetzt_utc)
 
@@ -1085,7 +1086,6 @@ def verarbeite_bewertung_sofort(
                 o[f"{neuer_status}_cards"] = int(o[f"{neuer_status}_cards"]) + 1
             break
 
-    # 2. XP, Level, Streaks & Tagesquest im Speicher berechnen
     prog = hole_user_progress_schnell()
     level = int(prog["level"])
     xp_in_level = int(prog["xp_in_level"])
@@ -1097,29 +1097,41 @@ def verarbeite_bewertung_sofort(
     daily_quest_streak = int(prog["daily_quest_streak"])
     last_completed = prog["last_quest_completed_date"]
     selected_cursor_level = int(prog["selected_cursor_level"])
+    bonus_10_start = prog.get("bonus_10_start")
+    bonus_20_start = prog.get("bonus_20_start")
 
     ereignisse = []
     xp_gewinn = 0
+    streak_bonus = 0
 
     if not erfolgreich:
         answer_streak = 0
-        ereignisse.append("Antwort-Streak zurückgesetzt · Karte kommt gleich nochmal.")
+        ereignisse.append("Antwort-Serie gerissen · Karte kommt gleich nochmal.")
     else:
         basis_xp = 2 if war_erste_loesung else 1
         answer_streak += 1
         best_answer_streak = max(best_answer_streak, answer_streak)
 
+        if answer_streak >= 10:
+            if bonus_10_start is None:
+                bonus_10_start = jetzt_utc
+                ereignisse.append("🔥 10er-Serie! +1 XP Multiplikator für 30 Min. aktiv!")
+                streak_bonus = 1
+            elif (jetzt_utc - bonus_10_start).total_seconds() < 1800:
+                streak_bonus = 1
+
         if answer_streak >= 20:
-            streak_bonus = 2
-        elif answer_streak >= 10:
-            streak_bonus = 1
-        else:
-            streak_bonus = 0
+            if bonus_20_start is None:
+                bonus_20_start = jetzt_utc
+                ereignisse.append("⚡ 20er-Serie! +2 XP Multiplikator für 30 Min. aktiv!")
+                streak_bonus = 2
+            elif (jetzt_utc - bonus_20_start).total_seconds() < 1800:
+                streak_bonus = 2
 
         xp_gewinn += basis_xp + streak_bonus
         details = [f"+{basis_xp} XP ({'Erst-Erfolg' if war_erste_loesung else 'Wiederholung'})"]
         if streak_bonus > 0:
-            details.append(f"+{streak_bonus} XP ({answer_streak}er-Streak)")
+            details.append(f"+{streak_bonus} XP ({answer_streak}er-Serie)")
         ereignisse.append(" · ".join(details))
 
         daily_cards_done += 1
@@ -1175,9 +1187,10 @@ def verarbeite_bewertung_sofort(
         "daily_quest_streak": daily_quest_streak,
         "last_quest_completed_date": last_completed,
         "selected_cursor_level": selected_cursor_level,
+        "bonus_10_start": bonus_10_start,
+        "bonus_20_start": bonus_20_start,
     })
 
-    # 3. Beide Datenbank-Updates gebündelt & asynchron im Hintergrund speichern
     enqueue_db_writes([
         (
             """
@@ -1205,7 +1218,9 @@ def verarbeite_bewertung_sofort(
                 stats_date = %s,
                 daily_quest_streak = %s,
                 last_quest_completed_date = %s,
-                selected_cursor_level = %s
+                selected_cursor_level = %s,
+                bonus_10_start = %s,
+                bonus_20_start = %s
             WHERE id = 1;
             """,
             (
@@ -1220,6 +1235,8 @@ def verarbeite_bewertung_sofort(
                 daily_quest_streak,
                 last_completed,
                 selected_cursor_level,
+                bonus_10_start,
+                bonus_20_start,
             ),
         ),
     ])
@@ -1297,7 +1314,7 @@ def gemini_fragen(prompt, timeout=90):
             continue
     raise letzter_fehler
 
-# --- Text-Extraktion aus PDF, DOCX, TXT, MD ---
+# --- Text-Extraktion ---
 def extrahiere_text_aus_datei(uploaded_file):
     name = uploaded_file.name.lower()
     raw_bytes = uploaded_file.read()
@@ -1320,7 +1337,7 @@ def extrahiere_text_aus_datei(uploaded_file):
                 continue
         return ""
 
-# --- Active-Recall Kartengenerator ---
+# --- Kartengenerator ---
 def generiere_karteikarten(text_inhalt, anzahl, aufgabentypen):
     gekuerzter_text = text_inhalt[:28000]
     typen_beschreibung = {
@@ -1422,7 +1439,7 @@ def generiere_karteikarten(text_inhalt, anzahl, aufgabentypen):
         })
     return bereinigt
 
-# --- Spaced Repetition Algorithmus (Anki SM-2 Logik) ---
+# --- Spaced Repetition Algorithmus ---
 def berechne_sm2(ease_factor, interval_days, repetitions, lapses, bewertung):
     ef = float(ease_factor)
     interval = int(interval_days)
@@ -1477,7 +1494,7 @@ def formatiere_intervall_vorschau(ease_factor, interval_days, repetitions, lapse
     else:
         return f"{iv} Tage"
 
-# --- Datenbank-Schreiboperationen (für Verwaltung & Upload) ---
+# --- Datenbank-Verwaltungs-Befehle ---
 def erstelle_ordner(name):
     conn = get_connection()
     broken = False
@@ -1697,14 +1714,36 @@ st.markdown('<hr style="margin-top:0.6rem;margin-bottom:1.1rem;">', unsafe_allow
 xp_im_lvl = int(user_prog["xp_in_level"])
 xp_ziel_lvl = xp_fuer_naechstes_level(aktuelles_level)
 lvl_prozent = min(100, round((xp_im_lvl / max(1, xp_ziel_lvl)) * 100))
-
 answer_streak = int(user_prog["answer_streak"])
-if answer_streak >= 20:
-    streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Streak (+2 XP / Karte)</span>'
-elif answer_streak >= 10:
-    streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Streak (+1 XP / Karte)</span>'
+
+# Aktiver Multiplikator inkl. Restzeit
+now_utc = datetime.datetime.now(datetime.timezone.utc)
+b10_start = user_prog.get("bonus_10_start")
+b20_start = user_prog.get("bonus_20_start")
+
+bonus_val = 0
+time_left = 0
+
+if b20_start and (now_utc - b20_start).total_seconds() < 1800:
+    bonus_val = 2
+    time_left = int(30 - (now_utc - b20_start).total_seconds() // 60)
+elif b10_start and (now_utc - b10_start).total_seconds() < 1800:
+    bonus_val = 1
+    time_left = int(30 - (now_utc - b10_start).total_seconds() // 60)
+
+if bonus_val == 2:
+    streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Serie (+2 XP / {time_left} Min)</span>'
+elif bonus_val == 1:
+    streak_html = f'<span class="streak-chip-hot">⚡ {answer_streak}er-Serie (+1 XP / {time_left} Min)</span>'
 else:
-    streak_html = f'<span class="streak-chip">Serie: {answer_streak} richtig in Folge</span>'
+    b10_used = b10_start is not None and (now_utc - b10_start).total_seconds() >= 1800
+    b20_used = b20_start is not None and (now_utc - b20_start).total_seconds() >= 1800
+    if answer_streak >= 20 and b20_used:
+        streak_html = f'<span class="streak-chip">Serie: {answer_streak} (Tages-Boosts verbraucht)</span>'
+    elif answer_streak >= 10 and b10_used and not b20_start:
+        streak_html = f'<span class="streak-chip">Serie: {answer_streak} (Boost 2 ab Serie 20)</span>'
+    else:
+        streak_html = f'<span class="streak-chip">Serie: {answer_streak} richtig in Folge</span>'
 
 naechster_cursor = next((c for c in CURSOR_MILESTONES if c["level"] > aktuelles_level), None)
 cursor_vorschau_txt = (
@@ -1750,7 +1789,7 @@ with col_quest:
 
 st.markdown('<div style="height:0.95rem;"></div>', unsafe_allow_html=True)
 
-# --- Status-Kacheln (aus In-Memory Cache -> 0 ms Ladezeit) ---
+# --- Status-Kacheln ---
 ordner_liste = hole_ordner_schnell()
 gesamt_karten = sum(o["total_cards"] for o in ordner_liste)
 gesamt_faellig = sum(o["due_cards"] for o in ordner_liste)
@@ -1766,7 +1805,7 @@ with c3:
 with c4:
     st.markdown(f'<div class="stat-card"><div class="stat-num">{len(ordner_liste)}</div><div class="stat-label">Themen-Ordner</div></div>', unsafe_allow_html=True)
 
-# --- Themen-Fortschritt (Anki-Status pro Thema) ---
+# --- Themen-Fortschritt ---
 if ordner_liste:
     st.markdown('<div style="height:1.1rem;"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-kicker">Themen-Fortschritt (Anki-Status)</div>', unsafe_allow_html=True)
@@ -1787,7 +1826,7 @@ tab_lernen, tab_upload, tab_ordner = st.tabs([
 ])
 
 # ==============================================================================
-# TAB 1: LERNEN (SPACED REPETITION – OHNE LADEVERZÖGERUNG)
+# TAB 1: LERNEN
 # ==============================================================================
 with tab_lernen:
     if st.session_state.last_xp_event:
@@ -1833,7 +1872,15 @@ with tab_lernen:
         st.progress(erledigt / gesamt_sitzung, text=f"Fortschritt: {erledigt} abgeschlossen · {rest} verbleibend")
 
         war_neu = (int(aktuelle_karte.get("success_count", 0)) == 0)
-        aktueller_streak_bonus = 2 if answer_streak >= 20 else (1 if answer_streak >= 10 else 0)
+        sim_streak = answer_streak + 1
+        aktueller_streak_bonus = 0
+        if sim_streak >= 10:
+            if b10_start is None or (now_utc - b10_start).total_seconds() < 1800:
+                aktueller_streak_bonus = 1
+        if sim_streak >= 20:
+            if b20_start is None or (now_utc - b20_start).total_seconds() < 1800:
+                aktueller_streak_bonus = 2
+
         moegliche_xp = (2 if war_neu else 1) + aktueller_streak_bonus
 
         anzeige_typ = "Problemstellung" if aktuelle_karte["card_type"] == "Transfer" else aktuelle_karte["card_type"]
@@ -1858,7 +1905,6 @@ with tab_lernen:
             unsafe_allow_html=True,
         )
 
-        # Interaktive 4-Optionen-Auswahl bei Multiple Choice
         mc_options = []
         if aktuelle_karte["card_type"] == "Multiple Choice":
             try:
