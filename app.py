@@ -1,5 +1,7 @@
 import os
 import io
+import re
+import html
 import json
 import time
 import urllib.parse
@@ -134,6 +136,18 @@ def ermittle_aktiven_cursor(level: int, selected_cursor_level: int) -> dict:
 def xp_fuer_naechstes_level(level: int) -> int:
     return 100 + (max(1, int(level)) - 1) * 50
 
+# --- Sichere Text- & HTML-Formatierung ohne Markdown-Codeblock-Artefakte ---
+def formatiere_kartentext_html(rohtext: str, ist_lueckentext: bool = False) -> str:
+    bereinigt = html.escape(str(rohtext or "").strip())
+    if ist_lueckentext:
+        bereinigt = re.sub(
+            r"(\[\.{2,}\]|_{3,})",
+            '<span class="cloze-blank">________</span>',
+            bereinigt,
+        )
+    bereinigt = bereinigt.replace("\r\n", "\n").replace("\n", "<br>")
+    return bereinigt
+
 # --- Anki-Kartenstatus-Klassifikation ---
 def klassifiziere_karte_anki(karte: dict) -> str:
     reps = int(karte.get("repetitions", 0))
@@ -172,30 +186,28 @@ def baue_themen_fortschritt_html(ordner_row: dict) -> str:
         f'<span class="topic-due-badge">{due} fällig</span>'
         if due > 0 else '<span class="topic-done-badge">Alles erledigt</span>'
     )
+    name_esc = html.escape(str(ordner_row["name"]))
 
-    return f"""
-    <div class="topic-card">
-        <div class="topic-top-row">
-            <div class="topic-name">{ordner_row['name']}</div>
-            <div class="topic-right-meta">
-                <span class="topic-pct">{mastery_pct}% gefestigt</span>
-                {due_badge}
-            </div>
-        </div>
-        <div class="anki-bar-track">
-            <div class="anki-seg-gut" style="width:{p_gut}%;" title="Gut gelernt (≥ 6 Tage): {gut}"></div>
-            <div class="anki-seg-wackelig" style="width:{p_wackelig}%;" title="Wackelig (Lernphase): {wackelig}"></div>
-            <div class="anki-seg-kritisch" style="width:{p_kritisch}%;" title="Kritisch / Öfter falsch: {kritisch}"></div>
-            <div class="anki-seg-neu" style="width:{p_neu}%;" title="Ungelernt: {neu}"></div>
-        </div>
-        <div class="anki-legend-row">
-            <span><i class="dot-gut"></i><b>{gut}</b> gut gelernt</span>
-            <span><i class="dot-wackelig"></i><b>{wackelig}</b> wackelig</span>
-            <span><i class="dot-kritisch"></i><b>{kritisch}</b> öfter falsch</span>
-            <span><i class="dot-neu"></i><b>{neu}</b> ungelernt</span>
-        </div>
-    </div>
-    """
+    return (
+        f'<div class="topic-card">'
+        f'<div class="topic-top-row">'
+        f'<div class="topic-name">{name_esc}</div>'
+        f'<div class="topic-right-meta"><span class="topic-pct">{mastery_pct}% gefestigt</span>{due_badge}</div>'
+        f'</div>'
+        f'<div class="anki-bar-track">'
+        f'<div class="anki-seg-gut" style="width:{p_gut}%;"></div>'
+        f'<div class="anki-seg-wackelig" style="width:{p_wackelig}%;"></div>'
+        f'<div class="anki-seg-kritisch" style="width:{p_kritisch}%;"></div>'
+        f'<div class="anki-seg-neu" style="width:{p_neu}%;"></div>'
+        f'</div>'
+        f'<div class="anki-legend-row">'
+        f'<span><i class="dot-gut"></i><b>{gut}</b> gut gelernt</span>'
+        f'<span><i class="dot-wackelig"></i><b>{wackelig}</b> wackelig</span>'
+        f'<span><i class="dot-kritisch"></i><b>{kritisch}</b> öfter falsch</span>'
+        f'<span><i class="dot-neu"></i><b>{neu}</b> ungelernt</span>'
+        f'</div>'
+        f'</div>'
+    )
 
 # --- Basis-Design & Plastisches CSS ---
 st.markdown(
@@ -537,17 +549,26 @@ st.markdown(
     .dot-kritisch { background: #F87171; }
     .dot-neu { background: #334155; border: 1px solid #64748B; }
 
-    /* Plastische Karteikarten-Box */
+    /* Plastische Karteikarten-Box (normale, klare Typografie) */
     .flashcard-box {
         background: linear-gradient(160deg, #11192C 0%, #0A0F1B 100%);
         border: 1.5px solid rgba(125, 211, 252, 0.48);
         border-radius: 18px;
-        padding: 2rem 1.85rem;
+        padding: 2rem 2rem;
         margin: 1rem 0 1.25rem 0;
         box-shadow:
             0 18px 38px rgba(0, 0, 0, 0.58),
             0 0 0 1px rgba(125, 211, 252, 0.08),
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .flashcard-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.1rem;
     }
 
     .flashcard-badge {
@@ -560,7 +581,6 @@ st.markdown(
         background: linear-gradient(135deg, #7DD3FC 0%, #38BDF8 100%);
         padding: 0.26rem 0.72rem;
         border-radius: 7px;
-        margin-bottom: 1rem;
         box-shadow: 0 3px 10px rgba(56, 189, 248, 0.25);
     }
 
@@ -574,8 +594,6 @@ st.markdown(
         border: 1px solid rgba(125, 211, 252, 0.35);
         padding: 0.23rem 0.65rem;
         border-radius: 7px;
-        margin-left: 0.45rem;
-        margin-bottom: 1rem;
     }
 
     .flashcard-badge-warn {
@@ -587,15 +605,75 @@ st.markdown(
         background-color: #FACC15;
         padding: 0.25rem 0.68rem;
         border-radius: 7px;
-        margin-left: 0.45rem;
-        margin-bottom: 1rem;
     }
 
     .flashcard-question {
         font-size: 1.32rem;
-        font-weight: 600;
+        font-weight: 500;
         color: #F8FAFC;
-        line-height: 1.6;
+        line-height: 1.65;
+        letter-spacing: 0.005em;
+    }
+
+    .flashcard-answer-label {
+        font-size: 0.78rem;
+        color: #7DD3FC;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .flashcard-answer-body {
+        font-size: 1.15rem;
+        font-weight: 400;
+        color: #F8FAFC;
+        line-height: 1.65;
+    }
+
+    .flashcard-explanation {
+        margin-top: 1rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid rgba(125, 211, 252, 0.2);
+        color: #BAE6FD;
+        font-size: 0.96rem;
+        line-height: 1.55;
+    }
+
+    /* Lückentext-Platzhalter */
+    .cloze-blank {
+        display: inline-block;
+        min-width: 96px;
+        padding: 0 0.55rem;
+        margin: 0 0.2rem;
+        border-bottom: 2.5px solid #7DD3FC;
+        background: rgba(125, 211, 252, 0.12);
+        border-radius: 5px 5px 0 0;
+        color: #7DD3FC;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 0.08em;
+    }
+
+    /* Multiple-Choice Auswahlkarten */
+    div[data-testid="stRadio"] > div[role="radiogroup"] {
+        gap: 0.6rem;
+        margin-top: 0.4rem;
+        margin-bottom: 0.8rem;
+    }
+
+    div[data-testid="stRadio"] > div[role="radiogroup"] > label {
+        background: linear-gradient(165deg, #101829 0%, #0A0F1A 100%) !important;
+        border: 1px solid rgba(125, 211, 252, 0.3) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1.05rem !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38) !important;
+        transition: border-color 0.15s ease, transform 0.15s ease !important;
+    }
+
+    div[data-testid="stRadio"] > div[role="radiogroup"] > label:hover {
+        border-color: #7DD3FC !important;
+        transform: translateY(-1px) !important;
     }
 
     .xp-banner {
@@ -675,14 +753,7 @@ def passwort_pruefen():
 
     if not st.session_state.eingeloggt:
         st.markdown(
-            """
-            <div class="omni-header">
-                <div>
-                    <div class="omni-brand">OmniLearn</div>
-                    <div class="omni-tagline">Active Recall & Spaced Repetition</div>
-                </div>
-            </div>
-            """,
+            '<div class="omni-header"><div><div class="omni-brand">OmniLearn</div><div class="omni-tagline">Active Recall & Spaced Repetition</div></div></div>',
             unsafe_allow_html=True,
         )
         col_l, _ = st.columns([1.2, 1])
@@ -739,9 +810,12 @@ def init_db():
                     folder_id INTEGER NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
                     filename TEXT NOT NULL,
                     char_count INTEGER DEFAULT 0,
+                    content_text TEXT DEFAULT '',
                     uploaded_at TIMESTAMPTZ DEFAULT NOW()
                 );
             """)
+            cur.execute("ALTER TABLE documents ADD COLUMN IF NOT EXISTS content_text TEXT DEFAULT '';")
+
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS cards (
                     id SERIAL PRIMARY KEY,
@@ -994,17 +1068,11 @@ if aktiver_cursor["svg"]:
     cursor_uri = svg_zu_data_uri(aktiver_cursor["svg"])
     hx, hy = aktiver_cursor["hot_x"], aktiver_cursor["hot_y"]
     st.markdown(
-        f"""
-        <style>
-        html, body, .stApp, .stApp * {{
-            cursor: url("{cursor_uri}") {hx} {hy}, auto !important;
-        }}
-        </style>
-        """,
+        f'<style>html, body, .stApp, .stApp * {{ cursor: url("{cursor_uri}") {hx} {hy}, auto !important; }}</style>',
         unsafe_allow_html=True,
     )
 
-# --- Gemini API Initialisierung ---
+# --- Gemini API Initialisierung (volle Flash-Modelle für starke Aufgabenvielfalt) ---
 @st.cache_resource
 def init_gemini():
     try:
@@ -1028,7 +1096,7 @@ def init_gemini():
         pass
 
     verfuegbare_modelle.sort(key=lambda x: (
-        0 if "lite" in x.lower() else (1 if "flash" in x.lower() else 2),
+        0 if ("flash" in x.lower() and "lite" not in x.lower()) else (1 if "lite" in x.lower() else 2),
         x
     ))
     return verfuegbare_modelle
@@ -1078,34 +1146,59 @@ def extrahiere_text_aus_datei(uploaded_file):
                 continue
         return ""
 
-# --- Active-Recall Kartengenerator ---
+# --- Active-Recall Kartengenerator mit garantierter Aufgabenvielfalt ---
 def generiere_karteikarten(text_inhalt, anzahl, aufgabentypen):
     gekuerzter_text = text_inhalt[:28000]
     typen_beschreibung = {
-        "Klassisch": "Klassische Verständnis- und Definitionsfragen (präzise Frage auf der Vorderseite, strukturierte Kernantwort auf der Rückseite).",
-        "Lückentext": "Lückentext (Cloze Deletion): Ein wichtiger fachlicher Merksatz auf der Vorderseite, bei dem 1–2 zentrale Schlüsselbegriffe durch '[...]' ersetzt wurden; auf der Rückseite der vollständige Satz mit den eingesetzten Begriffen.",
-        "Multiple Choice": "Multiple Choice: Eine anspruchsvolle Frage auf der Vorderseite sowie genau 4 plausible Antwortmöglichkeiten im Feld 'options' (als Liste von 4 Strings, ohne Buchstaben-Präfix wie A/B/C/D). Im Feld 'answer' steht exakt der Wortlaut der einen richtigen Option.",
-        "Transfer": "Transfer- & Anwendungsfrage: Ein konkretes Fallbeispiel oder eine 'Was passiert, wenn...'-Problemstellung auf der Vorderseite und die fachlich begründete Lösung auf der Rückseite."
+        "Lückentext": (
+            "Lückentext: Formuliere auf der Vorderseite ('question') einen wichtigen, prüfungsrelevanten Merksatz oder Zusammenhang, "
+            "bei dem 1 bis 2 zentrale Fachbegriffe durch '______' ersetzt wurden. "
+            "Schreibe in 'answer' die gesuchten Begriffe sowie den vollständigen Satz. 'options' ist []."
+        ),
+        "Problemstellung": (
+            "Problemstellung: Formuliere auf der Vorderseite ('question') ein kurzes, konkretes Fallbeispiel, eine Mini-Aufgabe "
+            "oder eine 'Was passiert, wenn...'-Problemstellung, die der Lernende aktiv durchdenken und lösen muss. "
+            "Schreibe in 'answer' die klare Lösung mit Schritt-für-Schritt-Begründung. 'options' ist []."
+        ),
+        "Multiple Choice": (
+            "Multiple Choice: Formuliere auf der Vorderseite ('question') eine präzise Verständnis- oder Anwendungsfrage "
+            "(liste die Antwortmöglichkeiten NICHT im Text von 'question' auf!). "
+            "Fülle das Array 'options' mit EXAKT 4 plausiblen, kurzen Antwortoptionen (ohne Buchstaben wie A/B/C/D davor). "
+            "Schreibe in 'answer' exakt den identischen Wortlaut der einen richtigen Option aus 'options'."
+        ),
+        "Klassisch": (
+            "Klassisch: Formuliere auf der Vorderseite ('question') eine gezielte offene Verständnis- oder Erklärungsfrage "
+            "und in 'answer' eine klare, strukturierte Musterantwort. 'options' ist []."
+        ),
     }
+
+    gewaehlte_liste = [t for t in aufgabentypen if t in typen_beschreibung]
+    if not gewaehlte_liste:
+        gewaehlte_liste = ["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"]
+
+    karten_fahrplan = "\n".join(
+        f"- Karte {i + 1}: Pflicht-Typ '{gewaehlte_liste[i % len(gewaehlte_liste)]}'"
+        for i in range(anzahl)
+    )
     gewaehlte_beschreibungen = "\n".join(
-        f"- {t}: {typen_beschreibung[t]}" for t in aufgabentypen if t in typen_beschreibung
+        f"* {t}: {typen_beschreibung[t]}" for t in gewaehlte_liste
     )
 
     prompt = (
         f"Du bist ein Experte für evidenzbasiertes Lernen (Active Recall & Spaced Repetition).\n"
-        f"Erstelle auf Basis des folgenden Lernmaterials genau {anzahl} hochwertige, prüfungsrelevante Karteikarten.\n"
-        f"Verteile die Karten möglichst gleichmäßig auf diese Aufgabentypen:\n{gewaehlte_beschreibungen}\n\n"
-        "Wichtige Regeln:\n"
-        "1. Keine trivialen Ja/Nein-Fragen; jede Karte soll aktives Abrufen fördern.\n"
-        "2. Formuliere klar, präzise und auf Deutsch (oder in der Sprache des Dokuments, falls Fachbegriffe/Englisch).\n"
-        "3. Antworte AUSSCHLIESSLICH mit einem gültigen JSON-Array (ohne Markdown-Codeblock ```json).\n"
-        "Jedes Objekt im Array muss exakt diese Felder besitzen:\n"
-        '{"card_type": "Klassisch|Lückentext|Multiple Choice|Transfer", '
-        '"question": "Vorderseite der Karte", '
-        '"options": ["Option 1", "Option 2", "Option 3", "Option 4"], '
-        '"answer": "Richtige Antwort", '
-        '"explanation": "Kurze Eselsbrücke, Kontext oder Begründung (1–2 Sätze)"}\n'
-        "Hinweis: Bei allen Typen außer 'Multiple Choice' muss 'options' eine leere Liste [] sein.\n\n"
+        f"Erstelle auf Basis des folgenden Lernmaterials genau {anzahl} hochwertige, abwechslungsreiche Lernaufgaben.\n\n"
+        f"VERBINDLICHER AUFGABEN-FAHRPLAN (halte dich exakt an den vorgegebenen Typ je Karte):\n{karten_fahrplan}\n\n"
+        f"FORMAT-REGELN JE TYP:\n{gewaehlte_beschreibungen}\n\n"
+        "Allgemeine Qualitätsregeln:\n"
+        "1. Keine trivialen Ja/Nein-Fragen. Jede Aufgabe soll echtes Nachdenken und aktives Abrufen auslösen.\n"
+        "2. Schreibe alle Fragen, Lückentexte und Problemstellungen als normalen, gut lesbaren Fließtext (ohne Code-Blöcke).\n"
+        "3. Bei 'Multiple Choice' MÜSSEN im Feld 'options' immer genau 4 verschiedene Antwortmöglichkeiten stehen!\n"
+        "4. Antworte AUSSCHLIESSLICH mit einem gültigen JSON-Array (ohne ```json).\n\n"
+        "Beispiel für die JSON-Struktur:\n"
+        '[\n'
+        '  {"card_type": "Lückentext", "question": "Sinkt der Leitzins, werden Kredite günstiger und die gesamtwirtschaftliche ______ steigt.", "options": [], "answer": "Investitionsnachfrage (Vollständiger Satz: ...)", "explanation": "Niedrigere Zinsen senken die Finanzierungskosten."},\n'
+        '  {"card_type": "Multiple Choice", "question": "Welcher Effekt tritt ein, wenn der Preis eines superioren Gutes steigt?", "options": ["Sowohl Substitutions- als auch Einkommenseffekt senken die Nachfrage", "Nur der Substitutionseffekt wirkt negativ", "Die Nachfrage steigt durch den Giffen-Effekt", "Beide Effekte heben sich immer vollständig auf"], "answer": "Sowohl Substitutions- als auch Einkommenseffekt senken die Nachfrage", "explanation": "Bei normalen/superioren Gütern wirken beide Effekte in dieselbe Richtung."}\n'
+        ']\n\n'
         f"LERNMATERIAL:\n{gekuerzter_text}"
     )
 
@@ -1119,20 +1212,43 @@ def generiere_karteikarten(text_inhalt, anzahl, aufgabentypen):
 
     karten = json.loads(rohtext)
     bereinigt = []
-    for k in karten:
+    for idx, k in enumerate(karten):
         if not k.get("question") or not k.get("answer"):
             continue
-        ctype = k.get("card_type", "Klassisch")
-        if ctype not in ("Klassisch", "Lückentext", "Multiple Choice", "Transfer"):
+        erwarteter_typ = gewaehlte_liste[idx % len(gewaehlte_liste)]
+        ctype = str(k.get("card_type", erwarteter_typ)).strip()
+        if ctype == "Transfer":
+            ctype = "Problemstellung"
+        if ctype not in ("Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"):
+            ctype = erwarteter_typ
+
+        raw_opts = k.get("options") if ctype == "Multiple Choice" else []
+        opts = []
+        if isinstance(raw_opts, list):
+            for o in raw_opts:
+                clean_o = re.sub(r"^[A-Da-d1-4][\)\.\:]\s*", "", str(o).strip())
+                if clean_o:
+                    opts.append(clean_o)
+
+        ans_clean = re.sub(r"^[A-Da-d1-4][\)\.\:]\s*", "", str(k["answer"]).strip())
+
+        if ctype == "Multiple Choice" and len(opts) < 2:
             ctype = "Klassisch"
-        opts = k.get("options") if ctype == "Multiple Choice" else []
-        if not isinstance(opts, list):
             opts = []
+        elif ctype == "Multiple Choice":
+            opts = opts[:4]
+            if ans_clean not in opts and opts:
+                match = next((o for o in opts if ans_clean.lower() in o.lower() or o.lower() in ans_clean.lower()), None)
+                if match:
+                    ans_clean = match
+                else:
+                    opts[0] = ans_clean
+
         bereinigt.append({
             "card_type": ctype,
             "question": str(k["question"]).strip(),
-            "options": [str(o).strip() for o in opts],
-            "answer": str(k["answer"]).strip(),
+            "options": opts,
+            "answer": ans_clean,
             "explanation": str(k.get("explanation", "")).strip(),
         })
     return bereinigt
@@ -1269,7 +1385,7 @@ def lade_dokumente_fuer_ordner(folder_id):
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
-                SELECT d.id, d.filename, d.char_count, d.uploaded_at, COUNT(c.id) AS card_count
+                SELECT d.id, d.filename, d.char_count, COALESCE(d.content_text, '') AS content_text, d.uploaded_at, COUNT(c.id) AS card_count
                 FROM documents d
                 LEFT JOIN cards c ON c.document_id = d.id
                 WHERE d.folder_id = %s
@@ -1280,15 +1396,39 @@ def lade_dokumente_fuer_ordner(folder_id):
     finally:
         conn.close()
 
-def speichere_dokument_und_karten(folder_id, filename, char_count, karten_liste):
+def speichere_dokument_und_karten(folder_id, filename, char_count, karten_liste, content_text=""):
     conn = get_connection()
     try:
         with conn.cursor() as cur:
             cur.execute(
-                "INSERT INTO documents (folder_id, filename, char_count) VALUES (%s, %s, %s) RETURNING id;",
-                (folder_id, filename, char_count)
+                "INSERT INTO documents (folder_id, filename, char_count, content_text) VALUES (%s, %s, %s, %s) RETURNING id;",
+                (folder_id, filename, char_count, content_text[:40000])
             )
             doc_id = cur.fetchone()[0]
+            for k in karten_liste:
+                cur.execute(
+                    """
+                    INSERT INTO cards (folder_id, document_id, card_type, question, options_json, answer, explanation)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s);
+                    """,
+                    (
+                        folder_id,
+                        doc_id,
+                        k["card_type"],
+                        k["question"],
+                        json.dumps(k.get("options", []), ensure_ascii=False),
+                        k["answer"],
+                        k.get("explanation", "")
+                    )
+                )
+        conn.commit()
+    finally:
+        conn.close()
+
+def fuege_karten_zu_dokument_hinzu(folder_id, doc_id, karten_liste):
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
             for k in karten_liste:
                 cur.execute(
                     """
@@ -1384,24 +1524,17 @@ if "last_xp_event" not in st.session_state:
     st.session_state.last_xp_event = None
 
 # ==============================================================================
-# KOPFBEREICH & LEVEL-/QUEST-ÜBERSICHT (PLASTISCH & MINIMALISTISCH)
+# KOPFBEREICH & LEVEL-/QUEST-ÜBERSICHT
 # ==============================================================================
 col_brand, col_cursor_btn = st.columns([4.5, 1.5])
 with col_brand:
     st.markdown(
-        """
-        <div class="omni-header" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
-            <div>
-                <div class="omni-brand">OmniLearn</div>
-                <div class="omni-tagline">Active Recall & Spaced Repetition</div>
-            </div>
-        </div>
-        """,
+        '<div class="omni-header" style="border-bottom:none;margin-bottom:0;padding-bottom:0;"><div><div class="omni-brand">OmniLearn</div><div class="omni-tagline">Active Recall & Spaced Repetition</div></div></div>',
         unsafe_allow_html=True,
     )
 
 with col_cursor_btn:
-    st.markdown("<div style='height:0.35rem;'></div>", unsafe_allow_html=True)
+    st.markdown('<div style="height:0.35rem;"></div>', unsafe_allow_html=True)
     with st.popover(f"🖱️ Maus: {aktiver_cursor['short']}", use_container_width=True):
         st.markdown("**Freigeschaltete Maus-Symbole**")
         st.caption("Alle 5 Level schaltest du ein neues Symbol für deinen Mauszeiger frei.")
@@ -1414,7 +1547,7 @@ with col_cursor_btn:
                 icon_html = "↖️ "
 
             status = "Freigeschaltet" if freigeschaltet else f"Ab Level {item['level']}"
-            label_row = f"{icon_html}<b>{item['name']}</b> — <span style='color:#94A3B8;font-size:0.82rem;'>{status}</span>"
+            label_row = f'{icon_html}<b>{item["name"]}</b> — <span style="color:#94A3B8;font-size:0.82rem;">{status}</span>'
             st.markdown(label_row, unsafe_allow_html=True)
 
             if freigeschaltet:
@@ -1424,7 +1557,7 @@ with col_cursor_btn:
                     setze_ausgewaehlten_cursor(item["level"])
                     st.rerun()
 
-st.markdown("<hr style='margin-top:0.6rem;margin-bottom:1.1rem;'>", unsafe_allow_html=True)
+st.markdown('<hr style="margin-top:0.6rem;margin-bottom:1.1rem;">', unsafe_allow_html=True)
 
 # --- Level- & Tagesquest-Karten ---
 xp_im_lvl = int(user_prog["xp_in_level"])
@@ -1463,45 +1596,25 @@ quest_status_txt = (
 col_lvl, col_quest = st.columns(2)
 with col_lvl:
     st.markdown(
-        f"""
-        <div class="sculpt-panel">
-            <div class="panel-top-row">
-                <span class="level-pill">Level {aktuelles_level}</span>
-                <span class="xp-meta">{xp_im_lvl} / {xp_ziel_lvl} XP</span>
-            </div>
-            <div class="progress-track">
-                <div class="progress-fill-ice" style="width:{lvl_prozent}%;"></div>
-            </div>
-            <div class="panel-footer-row">
-                {streak_html}
-                <span>{cursor_vorschau_txt}</span>
-            </div>
-        </div>
-        """,
+        f'<div class="sculpt-panel">'
+        f'<div class="panel-top-row"><span class="level-pill">Level {aktuelles_level}</span><span class="xp-meta">{xp_im_lvl} / {xp_ziel_lvl} XP</span></div>'
+        f'<div class="progress-track"><div class="progress-fill-ice" style="width:{lvl_prozent}%;"></div></div>'
+        f'<div class="panel-footer-row">{streak_html}<span>{cursor_vorschau_txt}</span></div>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 
 with col_quest:
     st.markdown(
-        f"""
-        <div class="sculpt-panel">
-            <div class="panel-top-row">
-                <span style="font-weight:700;color:#F8FAFC;font-size:0.98rem;">Tagesziel: {min(daily_done, DAILY_GOAL_TARGET)} / {DAILY_GOAL_TARGET} Karten</span>
-                <span class="xp-meta">{quest_status_txt}</span>
-            </div>
-            <div class="progress-track">
-                <div class="progress-fill-quest" style="width:{daily_pct}%;"></div>
-            </div>
-            <div class="panel-footer-row">
-                <span>7-Tage-Quest (Volles Level-Up): <b>{quest_streak}</b> Tage</span>
-                <span class="day-dots">{dots_html}</span>
-            </div>
-        </div>
-        """,
+        f'<div class="sculpt-panel">'
+        f'<div class="panel-top-row"><span style="font-weight:700;color:#F8FAFC;font-size:0.98rem;">Tagesziel: {min(daily_done, DAILY_GOAL_TARGET)} / {DAILY_GOAL_TARGET} Karten</span><span class="xp-meta">{quest_status_txt}</span></div>'
+        f'<div class="progress-track"><div class="progress-fill-quest" style="width:{daily_pct}%;"></div></div>'
+        f'<div class="panel-footer-row"><span>7-Tage-Quest (Volles Level-Up): <b>{quest_streak}</b> Tage</span><span class="day-dots">{dots_html}</span></div>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 
-st.markdown("<div style='height:0.95rem;'></div>", unsafe_allow_html=True)
+st.markdown('<div style="height:0.95rem;"></div>', unsafe_allow_html=True)
 
 # --- Status-Kacheln ---
 ordner_liste = lade_ordner()
@@ -1521,7 +1634,7 @@ with c4:
 
 # --- Themen-Fortschritt (Anki-Status pro Thema) ---
 if ordner_liste:
-    st.markdown("<div style='height:1.1rem;'></div>", unsafe_allow_html=True)
+    st.markdown('<div style="height:1.1rem;"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-kicker">Themen-Fortschritt (Anki-Status)</div>', unsafe_allow_html=True)
     for idx in range(0, len(ordner_liste), 2):
         t_cols = st.columns(2)
@@ -1531,7 +1644,7 @@ if ordner_liste:
             with t_cols[1]:
                 st.markdown(baue_themen_fortschritt_html(ordner_liste[idx + 1]), unsafe_allow_html=True)
 
-st.markdown("<div style='height:1.05rem;'></div>", unsafe_allow_html=True)
+st.markdown('<div style="height:1.05rem;"></div>', unsafe_allow_html=True)
 
 tab_lernen, tab_upload, tab_ordner = st.tabs([
     "🎯 Lernen (Spaced Repetition)",
@@ -1544,7 +1657,7 @@ tab_lernen, tab_upload, tab_ordner = st.tabs([
 # ==============================================================================
 with tab_lernen:
     if st.session_state.last_xp_event:
-        st.markdown(f'<div class="xp-banner">{st.session_state.last_xp_event}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="xp-banner">{html.escape(st.session_state.last_xp_event)}</div>', unsafe_allow_html=True)
 
     col_f, col_m, col_btn = st.columns([2.2, 2.2, 1.4])
     ordner_optionen = {"Alle Ordner": None}
@@ -1563,7 +1676,7 @@ with tab_lernen:
     gewaehlter_modus = modus_optionen[gewaehlter_modus_label]
 
     with col_btn:
-        st.markdown("<div style='height:1.72rem;'></div>", unsafe_allow_html=True)
+        st.markdown('<div style="height:1.72rem;"></div>', unsafe_allow_html=True)
         if st.button("▶ Sitzung starten", use_container_width=True):
             karten = lade_lernkarten(folder_id=gewaehlter_ordner_id, modus=gewaehlter_modus)
             st.session_state.study_queue = list(karten)
@@ -1587,26 +1700,30 @@ with tab_lernen:
         war_neu = (int(aktuelle_karte.get("success_count", 0)) == 0)
         aktueller_streak_bonus = 2 if answer_streak >= 20 else (1 if answer_streak >= 10 else 0)
         moegliche_xp = (2 if war_neu else 1) + aktueller_streak_bonus
-        xp_badge = f'<span class="flashcard-badge-xp">+{moegliche_xp} XP bei Erfolg</span>'
 
-        warn_badge = ""
+        anzeige_typ = "Problemstellung" if aktuelle_karte["card_type"] == "Transfer" else aktuelle_karte["card_type"]
+        folder_esc = html.escape(str(aktuelle_karte["folder_name"]))
+        typ_esc = html.escape(str(anzeige_typ))
+
+        badges_html = (
+            f'<span class="flashcard-badge">{folder_esc} · {typ_esc}</span>'
+            f'<span class="flashcard-badge-xp">+{moegliche_xp} XP bei Erfolg</span>'
+        )
         if aktuelle_karte.get("lapses", 0) > 0:
-            warn_badge = f'<span class="flashcard-badge-warn">Wiederholung ({aktuelle_karte["lapses"]}× falsch)</span>'
+            badges_html += f'<span class="flashcard-badge-warn">Wiederholung ({aktuelle_karte["lapses"]}× falsch)</span>'
 
-        frage_html = aktuelle_karte["question"].replace("\n", "<br>")
+        ist_lueckentext = (anzeige_typ == "Lückentext")
+        frage_html = formatiere_kartentext_html(aktuelle_karte["question"], ist_lueckentext=ist_lueckentext)
+
         st.markdown(
-            f"""
-            <div class="flashcard-box">
-                <span class="flashcard-badge">{aktuelle_karte['folder_name']} · {aktuelle_karte['card_type']}</span>
-                {xp_badge}
-                {warn_badge}
-                <div class="flashcard-question">{frage_html}</div>
-            </div>
-            """,
+            f'<div class="flashcard-box">'
+            f'<div class="flashcard-meta">{badges_html}</div>'
+            f'<div class="flashcard-question">{frage_html}</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
 
-        # Interaktive Multiple-Choice-Auswahl vor dem Aufdecken
+        # Interaktive 4-Optionen-Auswahl bei Multiple Choice
         mc_options = []
         if aktuelle_karte["card_type"] == "Multiple Choice":
             try:
@@ -1617,7 +1734,7 @@ with tab_lernen:
         gewaehlte_mc = None
         if mc_options:
             gewaehlte_mc = st.radio(
-                "Wähle deine Antwort:",
+                "Wähle eine der 4 Antwortoptionen:",
                 mc_options,
                 key=f"mc_radio_{aktuelle_karte['id']}_{erledigt}"
             )
@@ -1633,21 +1750,23 @@ with tab_lernen:
                 else:
                     st.error(f"Deine Auswahl: **{gewaehlte_mc}** — das war leider nicht richtig.")
 
-            antwort_html = aktuelle_karte["answer"].replace("\n", "<br>")
-            erklaerung = aktuelle_karte.get("explanation", "").strip()
-            erklaerung_html = f"<br><br><span style='color:#7DD3FC;font-size:0.96rem;'>💡 {erklaerung}</span>" if erklaerung else ""
+            antwort_html = formatiere_kartentext_html(aktuelle_karte["answer"], ist_lueckentext=False)
+            erklaerung = str(aktuelle_karte.get("explanation") or "").strip()
+            erklaerung_block = (
+                f'<div class="flashcard-explanation">💡 {formatiere_kartentext_html(erklaerung)}</div>'
+                if erklaerung else ""
+            )
 
             st.markdown(
-                f"""
-                <div class="flashcard-box" style="border-color:#7DD3FC;">
-                    <div style="font-size:0.78rem;color:#7DD3FC;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.45rem;font-weight:700;">Lösung</div>
-                    <div style="font-size:1.12rem;color:#F8FAFC;line-height:1.62;">{antwort_html}{erklaerung_html}</div>
-                </div>
-                """,
+                f'<div class="flashcard-box" style="border-color:#7DD3FC;">'
+                f'<div class="flashcard-answer-label">Lösung</div>'
+                f'<div class="flashcard-answer-body">{antwort_html}</div>'
+                f'{erklaerung_block}'
+                f'</div>',
                 unsafe_allow_html=True,
             )
 
-            st.caption("Wie gut konntest du die Antwort abrufen?")
+            st.caption("Wie gut konntest du die Aufgabe lösen?")
             b1, b2, b3, b4 = st.columns(4)
 
             p1 = formatiere_intervall_vorschau(aktuelle_karte["ease_factor"], aktuelle_karte["interval_days"], aktuelle_karte["repetitions"], aktuelle_karte["lapses"], 1)
@@ -1737,7 +1856,7 @@ with tab_upload:
         ziel_ordner_name = st.selectbox("Zielordner für deine Dokumente", list(ziel_ordner_map.keys()))
         ziel_ordner_id = ziel_ordner_map[ziel_ordner_name]
 
-        st.markdown('<div class="ar-subtitle">2. Dokumente hochladen & Active-Recall-Karten erstellen</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ar-subtitle">2. Dokumente hochladen & abwechslungsreiche Lernkarten erstellen</div>', unsafe_allow_html=True)
         uploaded_files = st.file_uploader(
             "Dokumente auswählen (PDF, DOCX, TXT, MD – auch mehrere gleichzeitig)",
             type=["pdf", "docx", "txt", "md"],
@@ -1745,14 +1864,14 @@ with tab_upload:
         )
 
         col_opt1, col_opt2 = st.columns([1, 2])
-        karten_pro_dok = col_opt1.slider("Karten pro Dokument", min_value=3, max_value=25, value=8)
+        karten_pro_dok = col_opt1.slider("Karten pro Dokument", min_value=4, max_value=24, value=8)
         gewaehlte_typen = col_opt2.multiselect(
-            "Aufgabentypen (Active Recall)",
-            ["Klassisch", "Lückentext", "Multiple Choice", "Transfer"],
-            default=["Klassisch", "Lückentext", "Multiple Choice", "Transfer"]
+            "Aufgaben-Mix (werden abwechselnd generiert)",
+            ["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"],
+            default=["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"]
         )
 
-        if st.button("⚡ Karteikarten aus Dokumenten generieren", use_container_width=True):
+        if st.button("⚡ Abwechslungsreiche Lernkarten generieren", use_container_width=True):
             if not uploaded_files:
                 st.warning("Bitte lade zuerst mindestens eine Datei hoch.")
             elif not gewaehlte_typen:
@@ -1760,20 +1879,20 @@ with tab_upload:
             else:
                 gesamt_erstellt = 0
                 for datei in uploaded_files:
-                    with st.spinner(f"Lese '{datei.name}' aus und erstelle Active-Recall-Karten..."):
+                    with st.spinner(f"Lese '{datei.name}' aus und erstelle Lückentexte, Problemstellungen & Multiple-Choice-Fragen..."):
                         try:
                             text = extrahiere_text_aus_datei(datei)
                             if len(text) < 40:
                                 st.warning(f"In '{datei.name}' konnte kaum Text gefunden werden (evtl. reiner Bild-Scan).")
                                 continue
                             neue_karten = generiere_karteikarten(text, karten_pro_dok, gewaehlte_typen)
-                            speichere_dokument_und_karten(ziel_ordner_id, datei.name, len(text), neue_karten)
+                            speichere_dokument_und_karten(ziel_ordner_id, datei.name, len(text), neue_karten, content_text=text)
                             gesamt_erstellt += len(neue_karten)
                         except Exception as e:
                             st.error(f"Fehler bei '{datei.name}': {e}")
 
                 if gesamt_erstellt > 0:
-                    st.success(f"{gesamt_erstellt} Karteikarten wurden erfolgreich im Ordner **{ziel_ordner_name}** gespeichert!")
+                    st.success(f"{gesamt_erstellt} abwechslungsreiche Lernkarten wurden im Ordner **{ziel_ordner_name}** gespeichert!")
                     time.sleep(1)
                     st.rerun()
 
@@ -1796,7 +1915,20 @@ with tab_ordner:
         if doks:
             for d in doks:
                 datum_str = d["uploaded_at"].astimezone(BERLIN_TZ).strftime("%d.%m.%Y %H:%M")
-                st.markdown(f"- **{d['filename']}** ({d['card_count']} Karten · hochgeladen am {datum_str})")
+                col_doc1, col_doc2 = st.columns([3.5, 1.5])
+                with col_doc1:
+                    st.markdown(f"- **{d['filename']}** ({d['card_count']} Karten · hochgeladen am {datum_str})")
+                with col_doc2:
+                    if d.get("content_text") and len(d["content_text"]) >= 40:
+                        if st.button("➕ 8 neue Mix-Karten", key=f"regen_doc_{d['id']}", use_container_width=True):
+                            with st.spinner("Generiere neuen Aufgaben-Mix..."):
+                                neue = generiere_karteikarten(
+                                    d["content_text"],
+                                    8,
+                                    ["Lückentext", "Problemstellung", "Multiple Choice", "Klassisch"]
+                                )
+                                fuege_karten_zu_dokument_hinzu(akt_ordner["id"], d["id"], neue)
+                                st.rerun()
         else:
             st.caption("In diesem Ordner wurden noch keine Dokumente hochgeladen.")
 
@@ -1842,8 +1974,16 @@ with tab_ordner:
                 faellig = k["next_review"] <= jetzt_utc
                 status_txt = "Jetzt fällig" if faellig else f"Fällig am {k['next_review'].astimezone(BERLIN_TZ).strftime('%d.%m.%Y')}"
                 fehler_txt = f" · {k['lapses']}× falsch" if k["lapses"] > 0 else ""
-                with st.expander(f"{badge_map[anki_kat]} · [{k['card_type']}] {k['question'][:80]} ({status_txt}{fehler_txt})"):
+                typ_label = "Problemstellung" if k["card_type"] == "Transfer" else k["card_type"]
+                with st.expander(f"{badge_map[anki_kat]} · [{typ_label}] {k['question'][:80]} ({status_txt}{fehler_txt})"):
                     st.markdown(f"**Frage:** {k['question']}")
+                    if typ_label == "Multiple Choice" and k.get("options_json"):
+                        try:
+                            opts_prev = json.loads(k["options_json"])
+                            if opts_prev:
+                                st.markdown("**Optionen:** " + " · ".join(opts_prev))
+                        except Exception:
+                            pass
                     st.markdown(f"**Antwort:** {k['answer']}")
                     if k.get("explanation"):
                         st.caption(f"Erklärung: {k['explanation']}")
